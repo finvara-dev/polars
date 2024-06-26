@@ -180,7 +180,7 @@ def _parse_dtype_restrictions(
         for dt in allowed_dtypes:
             if dt in excluded_dtypes_class:
                 continue
-            elif dt.is_nested():
+            if dt.is_nested():
                 allowed_dtypes_nested.append(dt)
             else:
                 allowed_dtypes_flat.append(dt)

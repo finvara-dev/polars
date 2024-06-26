@@ -252,8 +252,7 @@ def _unpack_schema(
         name, dtype = col
         if dtype is None:
             continue
-        else:
-            dtype = _normalize_dtype(dtype)
+        dtype = _normalize_dtype(dtype)
         name = lookup.get(name, name) if lookup else name
         column_dtypes[name] = dtype  # type: ignore[assignment]
 
