@@ -159,7 +159,7 @@ def read_parquet(
         )
 
     # Read file and bytes inputs using `read_parquet`
-    elif isinstance(source, (io.IOBase, bytes)):
+    if isinstance(source, (io.IOBase, bytes)):
         return _read_parquet_binary(
             source,
             columns=columns,

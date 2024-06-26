@@ -218,7 +218,7 @@ def concat(
                     to_supertypes=how.endswith("relaxed"),
                 )
             )
-        elif how in ("diagonal", "diagonal_relaxed"):
+        if how in ("diagonal", "diagonal_relaxed"):
             return wrap_ldf(
                 plr.concat_lf_diagonal(
                     elems,
@@ -227,17 +227,16 @@ def concat(
                     to_supertypes=how.endswith("relaxed"),
                 )
             )
-        elif how == "horizontal":
+        if how == "horizontal":
             return wrap_ldf(
                 plr.concat_lf_horizontal(
                     elems,
                     parallel=parallel,
                 )
             )
-        else:
-            allowed = ", ".join(repr(m) for m in get_args(ConcatMethod))
-            msg = f"LazyFrame `how` must be one of {{{allowed}}}, got {how!r}"
-            raise ValueError(msg)
+        allowed = ", ".join(repr(m) for m in get_args(ConcatMethod))
+        msg = f"LazyFrame `how` must be one of {{{allowed}}}, got {how!r}"
+        raise ValueError(msg)
 
     elif isinstance(first, pl.Series):
         if how == "vertical":

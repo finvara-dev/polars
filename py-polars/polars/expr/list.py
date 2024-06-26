@@ -1182,9 +1182,8 @@ class ExprListNameSpace:
             field_names = list(fields)
             pyexpr = self._pyexpr.list_to_struct(n_field_strategy, None, upper_bound)
             return wrap_expr(pyexpr).struct.rename_fields(field_names)
-        else:
-            pyexpr = self._pyexpr.list_to_struct(n_field_strategy, fields, upper_bound)
-            return wrap_expr(pyexpr)
+        pyexpr = self._pyexpr.list_to_struct(n_field_strategy, fields, upper_bound)
+        return wrap_expr(pyexpr)
 
     def eval(self, expr: Expr, *, parallel: bool = False) -> Expr:
         """

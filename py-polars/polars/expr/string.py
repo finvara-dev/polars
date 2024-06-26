@@ -292,7 +292,7 @@ class ExprStringNameSpace:
         """
         if dtype == Date:
             return self.to_date(format, strict=strict, exact=exact, cache=cache)
-        elif dtype == Datetime:
+        if dtype == Datetime:
             time_unit = getattr(dtype, "time_unit", None)
             time_zone = getattr(dtype, "time_zone", None)
             return self.to_datetime(
@@ -304,11 +304,10 @@ class ExprStringNameSpace:
                 cache=cache,
                 ambiguous=ambiguous,
             )
-        elif dtype == Time:
+        if dtype == Time:
             return self.to_time(format, strict=strict, cache=cache)
-        else:
-            msg = "`dtype` must be of type {Date, Datetime, Time}"
-            raise ValueError(msg)
+        msg = "`dtype` must be of type {Date, Datetime, Time}"
+        raise ValueError(msg)
 
     def to_decimal(
         self,
@@ -1317,11 +1316,10 @@ class ExprStringNameSpace:
         """
         if encoding == "hex":
             return wrap_expr(self._pyexpr.str_hex_decode(strict))
-        elif encoding == "base64":
+        if encoding == "base64":
             return wrap_expr(self._pyexpr.str_base64_decode(strict))
-        else:
-            msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
-            raise ValueError(msg)
+        msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
+        raise ValueError(msg)
 
     def encode(self, encoding: TransferEncoding) -> Expr:
         """
@@ -1354,11 +1352,10 @@ class ExprStringNameSpace:
         """
         if encoding == "hex":
             return wrap_expr(self._pyexpr.str_hex_encode())
-        elif encoding == "base64":
+        if encoding == "base64":
             return wrap_expr(self._pyexpr.str_base64_encode())
-        else:
-            msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
-            raise ValueError(msg)
+        msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
+        raise ValueError(msg)
 
     def extract(self, pattern: IntoExprColumn, group_index: int = 1) -> Expr:
         r"""

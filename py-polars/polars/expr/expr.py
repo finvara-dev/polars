@@ -2737,10 +2737,9 @@ class Expr:
         if value is not None:
             value = parse_into_expression(value, str_as_lit=True)
             return self._from_pyexpr(self._pyexpr.fill_null(value))
-        else:
-            return self._from_pyexpr(
-                self._pyexpr.fill_null_with_strategy(strategy, limit)
-            )
+        return self._from_pyexpr(
+            self._pyexpr.fill_null_with_strategy(strategy, limit)
+        )
 
     def fill_nan(self, value: int | float | Expr | None) -> Expr:
         """
@@ -4619,7 +4618,7 @@ class Expr:
 
         if strategy == "thread_local":
             return self.map_batches(wrap_f, agg_list=True, return_dtype=return_dtype)
-        elif strategy == "threading":
+        if strategy == "threading":
 
             def wrap_threading(x: Series) -> Series:
                 def get_lazy_promise(df: DataFrame) -> LazyFrame:
@@ -4661,9 +4660,8 @@ class Expr:
             return self.map_batches(
                 wrap_threading, agg_list=True, return_dtype=return_dtype
             )
-        else:
-            msg = f"strategy {strategy!r} is not supported"
-            raise ValueError(msg)
+        msg = f"strategy {strategy!r} is not supported"
+        raise ValueError(msg)
 
     def flatten(self) -> Expr:
         """

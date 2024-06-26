@@ -22,11 +22,10 @@ class ExprStructNameSpace:
     def __getitem__(self, item: str | int) -> Expr:
         if isinstance(item, str):
             return self.field(item)
-        elif isinstance(item, int):
+        if isinstance(item, int):
             return wrap_expr(self._pyexpr.struct_field_by_index(item))
-        else:
-            msg = f"expected type 'int | str', got {type(item).__name__!r} ({item!r})"
-            raise TypeError(msg)
+        msg = f"expected type 'int | str', got {type(item).__name__!r} ({item!r})"
+        raise TypeError(msg)
 
     def field(self, name: str | list[str], *more_names: str) -> Expr:
         """

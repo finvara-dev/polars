@@ -137,8 +137,7 @@ if __name__ == "__main__":
                 return True
             if IGNORE_RESULT & optionflags:
                 return True
-            else:
-                return OutputChecker.check_output(self, want, got, optionflags)
+            return OutputChecker.check_output(self, want, got, optionflags)
 
     doctest.OutputChecker = IgnoreResultOutputChecker  # type: ignore[misc]
 

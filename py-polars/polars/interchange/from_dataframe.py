@@ -36,7 +36,7 @@ def from_dataframe(df: SupportsInterchange, *, allow_copy: bool = True) -> DataF
     """
     if isinstance(df, pl.DataFrame):
         return df
-    elif isinstance(df, PolarsDataFrame):
+    if isinstance(df, PolarsDataFrame):
         return df._df
 
     if not hasattr(df, "__dataframe__"):
@@ -98,7 +98,7 @@ def _column_to_series(
 def _string_column_to_series(column: Column, *, allow_copy: bool) -> Series:
     if column.size() == 0:
         return pl.Series(dtype=String)
-    elif not allow_copy:
+    if not allow_copy:
         msg = "string buffers must be converted"
         raise CopyNotAllowedError(msg)
 
@@ -202,7 +202,7 @@ def _construct_data_buffer(
     if polars_dtype == Boolean and dtype[1] == 8:
         if length == 0:
             return pl.Series(dtype=Boolean)
-        elif not allow_copy:
+        if not allow_copy:
             msg = "byte-packed boolean buffer must be converted to bit-packed boolean"
             raise CopyNotAllowedError(msg)
         return pl.Series._from_buffer(UInt8, buffer_info, owner=buffer).cast(Boolean)
@@ -246,7 +246,7 @@ def _construct_validity_buffer(
     if null_type == ColumnNullType.NON_NULLABLE or column.null_count == 0:
         return None
 
-    elif null_type == ColumnNullType.USE_BITMASK:
+    if null_type == ColumnNullType.USE_BITMASK:
         if validity_buffer_info is None:
             return None
         buffer = validity_buffer_info[0]
@@ -254,7 +254,7 @@ def _construct_validity_buffer(
             buffer, null_value, column.size(), offset, allow_copy=allow_copy
         )
 
-    elif null_type == ColumnNullType.USE_BYTEMASK:
+    if null_type == ColumnNullType.USE_BYTEMASK:
         if validity_buffer_info is None:
             return None
         buffer = validity_buffer_info[0]
@@ -262,13 +262,13 @@ def _construct_validity_buffer(
             buffer, null_value, allow_copy=allow_copy
         )
 
-    elif null_type == ColumnNullType.USE_NAN:
+    if null_type == ColumnNullType.USE_NAN:
         if not allow_copy:
             msg = "bitmask must be constructed"
             raise CopyNotAllowedError(msg)
         return data.is_not_nan()
 
-    elif null_type == ColumnNullType.USE_SENTINEL:
+    if null_type == ColumnNullType.USE_SENTINEL:
         if not allow_copy:
             msg = "bitmask must be constructed"
             raise CopyNotAllowedError(msg)

@@ -56,8 +56,7 @@ def _open_posix_libc() -> ctypes.CDLL:
     try:
         if os.uname().sysname == "Darwin":
             return ctypes.CDLL("libc.dylib", use_errno=True)
-        else:
-            return ctypes.CDLL("libc.so.6", use_errno=True)
+        return ctypes.CDLL("libc.so.6", use_errno=True)
     except Exception:
         from ctypes import util as ctutil
 

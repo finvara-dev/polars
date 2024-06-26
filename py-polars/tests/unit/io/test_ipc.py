@@ -23,15 +23,13 @@ COMPRESSIONS = ["uncompressed", "lz4", "zstd"]
 def read_ipc(is_stream: bool, *args: Any, **kwargs: Any) -> pl.DataFrame:
     if is_stream:
         return pl.read_ipc_stream(*args, **kwargs)
-    else:
-        return pl.read_ipc(*args, **kwargs)
+    return pl.read_ipc(*args, **kwargs)
 
 
 def write_ipc(df: pl.DataFrame, is_stream: bool, *args: Any, **kwargs: Any) -> Any:
     if is_stream:
         return df.write_ipc_stream(*args, **kwargs)
-    else:
-        return df.write_ipc(*args, **kwargs)
+    return df.write_ipc(*args, **kwargs)
 
 
 @pytest.mark.parametrize("compression", COMPRESSIONS)

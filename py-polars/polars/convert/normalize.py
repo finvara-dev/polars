@@ -46,8 +46,7 @@ def _simple_json_normalize(
             ]
             return normalised_json_list
         return normalized_json_object
-    else:
-        return data
+    return data
 
 
 def _normalize_json_ordered(
@@ -165,7 +164,7 @@ def json_normalize(
     max_level += 1
     if isinstance(data, list) and len(data) == 0:
         return DataFrame()
-    elif isinstance(data, dict):
+    if isinstance(data, dict):
         data = [data]
     elif isinstance(data, abc.Iterable) and not isinstance(data, str):  # type: ignore[redundant-expr]
         data = list(data)

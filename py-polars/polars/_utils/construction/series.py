@@ -106,7 +106,7 @@ def sequence_to_pyseries(
             or is_namedtuple(value.__class__)
         ) and dtype != Object:
             return pl.DataFrame(values).to_struct(name)._s
-        elif isinstance(value, range) and dtype is None:
+        if isinstance(value, range) and dtype is None:
             values = [range_to_series("", v) for v in values]
         else:
             # for temporal dtypes:
@@ -148,7 +148,7 @@ def sequence_to_pyseries(
                 pyseries = pyseries.cast(dtype, strict=strict, wrap_numerical=False)
         return pyseries
 
-    elif dtype == Struct:
+    if dtype == Struct:
         struct_schema = dtype.to_schema() if isinstance(dtype, Struct) else None
         empty = {}  # type: ignore[var-annotated]
         return plc.sequence_to_pydf(
@@ -203,7 +203,7 @@ def sequence_to_pyseries(
             return s.dt.convert_time_zone(time_zone or "UTC")._s
         return s._s
 
-    elif (
+    if (
         _check_for_numpy(value)
         and isinstance(value, np.ndarray)
         and len(value.shape) == 1
@@ -217,70 +217,66 @@ def sequence_to_pyseries(
                 strict=strict,
                 nan_to_null=nan_to_null,
             )
-        else:
-            return PySeries.new_series_list(
-                name,
-                [
-                    numpy_to_pyseries("", v, strict=strict, nan_to_null=nan_to_null)
-                    for v in values
-                ],
-                strict,
-            )
+        return PySeries.new_series_list(
+            name,
+            [
+                numpy_to_pyseries("", v, strict=strict, nan_to_null=nan_to_null)
+                for v in values
+            ],
+            strict,
+        )
 
-    elif python_dtype in (list, tuple):
+    if python_dtype in (list, tuple):
         if dtype is None:
             return PySeries.new_from_any_values(name, values, strict=strict)
-        elif dtype == Object:
+        if dtype == Object:
             return PySeries.new_object(name, values, strict)
-        else:
-            if (inner_dtype := getattr(dtype, "inner", None)) is not None:
-                pyseries_list = [
-                    None
-                    if value is None
-                    else sequence_to_pyseries(
-                        "",
-                        value,
-                        inner_dtype,
-                        strict=strict,
-                        nan_to_null=nan_to_null,
-                    )
-                    for value in values
-                ]
-                pyseries = PySeries.new_series_list(name, pyseries_list, strict)
-            else:
-                pyseries = PySeries.new_from_any_values_and_dtype(
-                    name, values, dtype, strict=strict
+        if (inner_dtype := getattr(dtype, "inner", None)) is not None:
+            pyseries_list = [
+                None
+                if value is None
+                else sequence_to_pyseries(
+                    "",
+                    value,
+                    inner_dtype,
+                    strict=strict,
+                    nan_to_null=nan_to_null,
                 )
-            if dtype != pyseries.dtype():
-                pyseries = pyseries.cast(dtype, strict=False, wrap_numerical=False)
-            return pyseries
+                for value in values
+            ]
+            pyseries = PySeries.new_series_list(name, pyseries_list, strict)
+        else:
+            pyseries = PySeries.new_from_any_values_and_dtype(
+                name, values, dtype, strict=strict
+            )
+        if dtype != pyseries.dtype():
+            pyseries = pyseries.cast(dtype, strict=False, wrap_numerical=False)
+        return pyseries
 
-    elif python_dtype == pl.Series:
+    if python_dtype == pl.Series:
         return PySeries.new_series_list(
             name, [v._s if v is not None else None for v in values], strict
         )
 
-    elif python_dtype == PySeries:
+    if python_dtype == PySeries:
         return PySeries.new_series_list(name, values, strict)
-    else:
-        constructor = py_type_to_constructor(python_dtype)
-        if constructor == PySeries.new_object:
-            try:
-                srs = PySeries.new_from_any_values(name, values, strict)
-                if _check_for_numpy(python_dtype, check_type=False) and isinstance(
-                    np.bool_(True), np.generic
-                ):
-                    dtype = numpy_char_code_to_dtype(np.dtype(python_dtype).char)
-                    return srs.cast(dtype, strict=strict, wrap_numerical=False)
-                else:
-                    return srs
+    constructor = py_type_to_constructor(python_dtype)
+    if constructor == PySeries.new_object:
+        try:
+            srs = PySeries.new_from_any_values(name, values, strict)
+            if _check_for_numpy(python_dtype, check_type=False) and isinstance(
+                np.bool_(True), np.generic
+            ):
+                dtype = numpy_char_code_to_dtype(np.dtype(python_dtype).char)
+                return srs.cast(dtype, strict=strict, wrap_numerical=False)
+            return srs
 
-            except RuntimeError:
-                return PySeries.new_from_any_values(name, values, strict=strict)
+        except RuntimeError:
+            return PySeries.new_from_any_values(name, values, strict=strict)
 
-        return _construct_series_with_fallbacks(
-            constructor, name, values, dtype, strict=strict
-        )
+    return _construct_series_with_fallbacks(
+        constructor, name, values, dtype, strict=strict
+    )
 
 
 def _construct_series_with_fallbacks(
@@ -297,10 +293,9 @@ def _construct_series_with_fallbacks(
     except TypeError:
         if dtype is None:
             return PySeries.new_from_any_values(name, values, strict=strict)
-        else:
-            return PySeries.new_from_any_values_and_dtype(
-                name, values, dtype, strict=strict
-            )
+        return PySeries.new_from_any_values_and_dtype(
+            name, values, dtype, strict=strict
+        )
 
 
 def iterable_to_pyseries(
@@ -442,7 +437,7 @@ def numpy_to_pyseries(
         return constructor(
             name, values, nan_to_null if dtype in (np.float32, np.float64) else strict
         )
-    elif sum(values.shape) == 0:
+    if sum(values.shape) == 0:
         # Optimize by ingesting 1D and reshaping in Rust
         original_shape = values.shape
         values = values.reshape(-1)
@@ -453,16 +448,15 @@ def numpy_to_pyseries(
             nan_to_null=nan_to_null,
         )
         return wrap_s(py_s).reshape(original_shape)._s
-    else:
-        original_shape = values.shape
-        values = values.reshape(-1)
-        py_s = numpy_to_pyseries(
-            name,
-            values,
-            strict=strict,
-            nan_to_null=nan_to_null,
-        )
-        return wrap_s(py_s).reshape(original_shape)._s
+    original_shape = values.shape
+    values = values.reshape(-1)
+    py_s = numpy_to_pyseries(
+        name,
+        values,
+        strict=strict,
+        nan_to_null=nan_to_null,
+    )
+    return wrap_s(py_s).reshape(original_shape)._s
 
 
 def series_to_pyseries(

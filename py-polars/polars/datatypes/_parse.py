@@ -48,12 +48,11 @@ def parse_into_dtype(input: Any) -> PolarsDataType:
     """
     if is_polars_dtype(input):
         return input
-    elif isinstance(input, ForwardRef):
+    if isinstance(input, ForwardRef):
         return _parse_forward_ref_into_dtype(input)
-    elif isinstance(input, (UnionType, UnionTypeOld)):
+    if isinstance(input, (UnionType, UnionTypeOld)):
         return _parse_union_type_into_dtype(input)
-    else:
-        return parse_py_type_into_dtype(input)
+    return parse_py_type_into_dtype(input)
 
 
 def try_parse_into_dtype(input: Any) -> PolarsDataType | None:
@@ -69,36 +68,34 @@ def parse_py_type_into_dtype(input: PythonDataType | type[object]) -> PolarsData
     """Convert Python data type to Polars data type."""
     if input is int:
         return Int64()
-    elif input is float:
+    if input is float:
         return Float64()
-    elif input is str:
+    if input is str:
         return String()
-    elif input is bool:
+    if input is bool:
         return Boolean()
-    elif input is date:
+    if input is date:
         return Date()
-    elif input is datetime:
+    if input is datetime:
         return Datetime("us")
-    elif input is timedelta:
+    if input is timedelta:
         return Duration
-    elif input is time:
+    if input is time:
         return Time()
-    elif input is PyDecimal:
+    if input is PyDecimal:
         return Decimal
-    elif input is bytes:
+    if input is bytes:
         return Binary()
-    elif input is object:
+    if input is object:
         return Object()
-    elif input is NoneType:
+    if input is NoneType:
         return Null()
-    elif input is list or input is tuple:
+    if input is list or input is tuple:
         return List
 
-    elif hasattr(input, "__origin__") and hasattr(input, "__args__"):
+    if hasattr(input, "__origin__") and hasattr(input, "__args__"):
         return _parse_generic_into_dtype(input)
-
-    else:
-        _raise_on_invalid_dtype(input)
+    _raise_on_invalid_dtype(input)
 
 
 def _parse_generic_into_dtype(input: Any) -> PolarsDataType:

@@ -234,9 +234,8 @@ def _(a: Name) -> Any:
 def _(a: UnaryOp) -> Any:
     if isinstance(a.op, Invert):
         return pyiceberg.expressions.Not(_convert_predicate(a.operand))
-    else:
-        msg = f"Unexpected UnaryOp: {a}"
-        raise TypeError(msg)
+    msg = f"Unexpected UnaryOp: {a}"
+    raise TypeError(msg)
 
 
 @_convert_predicate.register(Call)
@@ -245,17 +244,16 @@ def _(a: Call) -> Any:
     f = _convert_predicate(a.func)
     if f == "field":
         return args
-    elif f in _temporal_conversions:
+    if f in _temporal_conversions:
         # convert from polars-native i64 to ISO8601 string
         return _temporal_conversions[f](*args).isoformat()
-    else:
-        ref = _convert_predicate(a.func.value)[0]  # type: ignore[attr-defined]
-        if f == "isin":
-            return pyiceberg.expressions.In(ref, args[0])
-        elif f == "is_null":
-            return pyiceberg.expressions.IsNull(ref)
-        elif f == "is_nan":
-            return pyiceberg.expressions.IsNaN(ref)
+    ref = _convert_predicate(a.func.value)[0]  # type: ignore[attr-defined]
+    if f == "isin":
+        return pyiceberg.expressions.In(ref, args[0])
+    if f == "is_null":
+        return pyiceberg.expressions.IsNull(ref)
+    if f == "is_nan":
+        return pyiceberg.expressions.IsNaN(ref)
 
     msg = f"Unknown call: {f!r}"
     raise ValueError(msg)
@@ -276,9 +274,8 @@ def _(a: BinOp) -> Any:
         return pyiceberg.expressions.And(lhs, rhs)
     if isinstance(op, BitOr):
         return pyiceberg.expressions.Or(lhs, rhs)
-    else:
-        msg = f"Unknown: {lhs} {op} {rhs}"
-        raise TypeError(msg)
+    msg = f"Unknown: {lhs} {op} {rhs}"
+    raise TypeError(msg)
 
 
 @_convert_predicate.register(Compare)
@@ -297,9 +294,8 @@ def _(a: Compare) -> Any:
         return pyiceberg.expressions.LessThan(lhs, rhs)
     if isinstance(op, LtE):
         return pyiceberg.expressions.LessThanOrEqual(lhs, rhs)
-    else:
-        msg = f"Unknown comparison: {op}"
-        raise TypeError(msg)
+    msg = f"Unknown comparison: {op}"
+    raise TypeError(msg)
 
 
 @_convert_predicate.register(List)

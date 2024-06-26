@@ -624,7 +624,7 @@ class Series:
         if self.dtype == Boolean and isinstance(other, bool) and op in ("eq", "neq"):
             if (other is True and op == "eq") or (other is False and op == "neq"):
                 return self.clone()
-            elif (other is False and op == "eq") or (other is True and op == "neq"):
+            if (other is False and op == "eq") or (other is True and op == "neq"):
                 return ~self
 
         elif isinstance(other, float) and self.dtype.is_integer():
@@ -942,17 +942,16 @@ class Series:
 
         if isinstance(other, Series):
             return self._from_pyseries(getattr(self._s, op_s)(other._s))
-        elif _check_for_numpy(other) and isinstance(other, np.ndarray):
+        if _check_for_numpy(other) and isinstance(other, np.ndarray):
             return self._from_pyseries(getattr(self._s, op_s)(Series(other)._s))
-        elif (
+        if (
             isinstance(other, (float, date, datetime, timedelta, str))
             and not self.dtype.is_float()
         ):
             _s = sequence_to_pyseries(self.name, [other])
             if "rhs" in op_ffi:
                 return self._from_pyseries(getattr(_s, op_s)(self._s))
-            else:
-                return self._from_pyseries(getattr(self._s, op_s)(_s))
+            return self._from_pyseries(getattr(self._s, op_s)(_s))
 
         if self.dtype.is_decimal() and isinstance(other, (PyDecimal, int)):
             if isinstance(other, int):
@@ -963,11 +962,9 @@ class Series:
 
             if "rhs" in op_ffi:
                 return self._from_pyseries(getattr(_s, op_s)(self._s))
-            else:
-                return self._from_pyseries(getattr(self._s, op_s)(_s))
-        else:
-            other = maybe_cast(other, self.dtype)
-            f = get_ffi_func(op_ffi, self.dtype, self._s)
+            return self._from_pyseries(getattr(self._s, op_s)(_s))
+        other = maybe_cast(other, self.dtype)
+        f = get_ffi_func(op_ffi, self.dtype, self._s)
         if f is None:
             msg = (
                 f"cannot do arithmetic with Series of dtype: {self.dtype!r} and argument"
@@ -1199,7 +1196,7 @@ class Series:
         if isinstance(key, int) and not isinstance(key, bool):
             self.scatter(key, value)
             return None
-        elif isinstance(value, Sequence) and not isinstance(value, str):
+        if isinstance(value, Sequence) and not isinstance(value, str):
             if self.dtype.is_numeric() or self.dtype.is_temporal():
                 self.scatter(key, value)  # type: ignore[arg-type]
                 return None
@@ -1384,12 +1381,11 @@ class Series:
                 .select(F.when(validity_mask).then(F.col(self.name)))
                 .to_series(0)
             )
-        else:
-            msg = (
-                "only `__call__` is implemented for numpy ufuncs on a Series, got "
-                f"`{method!r}`"
-            )
-            raise NotImplementedError(msg)
+        msg = (
+            "only `__call__` is implemented for numpy ufuncs on a Series, got "
+            f"`{method!r}`"
+        )
+        raise NotImplementedError(msg)
 
     def _repr_html_(self) -> str:
         """Format output data in HTML for display in Jupyter Notebooks."""
@@ -2392,8 +2388,7 @@ class Series:
         )
         if not include_breakpoint and not include_category:
             return out.to_frame()
-        else:
-            return out.struct.unnest()
+        return out.struct.unnest()
 
     def value_counts(
         self,
@@ -3136,10 +3131,9 @@ class Series:
         if in_place:
             self._s = self._s.sort(descending, nulls_last, multithreaded)
             return self
-        else:
-            return self._from_pyseries(
-                self._s.sort(descending, nulls_last, multithreaded)
-            )
+        return self._from_pyseries(
+            self._s.sort(descending, nulls_last, multithreaded)
+        )
 
     def top_k(self, k: int = 5) -> Series:
         r"""
@@ -3362,8 +3356,7 @@ class Series:
         df = F.select(F.lit(self).search_sorted(element, side))
         if isinstance(element, (list, Series, pl.Expr, np.ndarray)):
             return df.to_series()
-        else:
-            return df.item()
+        return df.item()
 
     def unique(self, *, maintain_order: bool = False) -> Series:
         """
@@ -5979,10 +5972,9 @@ class Series:
         if in_place:
             self._s.shrink_to_fit()
             return self
-        else:
-            series = self.clone()
-            series._s.shrink_to_fit()
-            return series
+        series = self.clone()
+        series._s.shrink_to_fit()
+        return series
 
     def hash(
         self,

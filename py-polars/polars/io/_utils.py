@@ -66,8 +66,7 @@ def parse_row_index_args(
     """
     if row_index_name is None:
         return None
-    else:
-        return (row_index_name, row_index_offset)
+    return (row_index_name, row_index_offset)
 
 
 @overload
@@ -273,8 +272,7 @@ def process_file_url(path: str, encoding: str | None = None) -> BytesIO:
     with urlopen(path) as f:
         if not encoding or encoding in {"utf8", "utf8-lossy"}:
             return BytesIO(f.read())
-        else:
-            return BytesIO(f.read().decode(encoding).encode("utf8"))
+        return BytesIO(f.read().decode(encoding).encode("utf8"))
 
 
 def is_glob_pattern(file: str) -> bool:

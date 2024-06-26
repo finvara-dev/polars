@@ -70,17 +70,16 @@ def _ensure_lazyframe(obj: Any) -> LazyFrame:
     """Return LazyFrame from compatible input."""
     if isinstance(obj, (DataFrame, LazyFrame)):
         return obj if isinstance(obj, LazyFrame) else obj.lazy()
-    elif isinstance(obj, Series):
+    if isinstance(obj, Series):
         return obj.to_frame().lazy()
-    elif _check_for_pandas(obj) and isinstance(obj, (pd.DataFrame, pd.Series)):
+    if _check_for_pandas(obj) and isinstance(obj, (pd.DataFrame, pd.Series)):
         if isinstance(frame := from_pandas(obj), Series):
             frame = frame.to_frame()
         return frame.lazy()
-    elif _check_for_pyarrow(obj) and isinstance(obj, (pa.Table, pa.RecordBatch)):
+    if _check_for_pyarrow(obj) and isinstance(obj, (pa.Table, pa.RecordBatch)):
         return from_arrow(obj).lazy()  # type: ignore[union-attr]
-    else:
-        msg = f"Unrecognised frame type: {type(obj)}"
-        raise ValueError(msg)
+    msg = f"Unrecognised frame type: {type(obj)}"
+    raise ValueError(msg)
 
 
 def _get_frame_locals(

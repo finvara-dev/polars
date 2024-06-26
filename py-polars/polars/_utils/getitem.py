@@ -51,14 +51,14 @@ def get_series_item_by_key(
     if isinstance(key, int):
         return s._s.get_index_signed(key)
 
-    elif isinstance(key, slice):
+    if isinstance(key, slice):
         return _select_elements_by_slice(s, key)
 
-    elif isinstance(key, range):
+    if isinstance(key, range):
         key = range_to_slice(key)
         return _select_elements_by_slice(s, key)
 
-    elif isinstance(key, Sequence):
+    if isinstance(key, Sequence):
         if not key:
             return s.clear()
         if isinstance(key[0], bool):
@@ -67,11 +67,11 @@ def get_series_item_by_key(
         indices = _convert_series_to_indices(indices, s.len())
         return _select_elements_by_index(s, indices)
 
-    elif isinstance(key, pl.Series):
+    if isinstance(key, pl.Series):
         indices = _convert_series_to_indices(key, s.len())
         return _select_elements_by_index(s, indices)
 
-    elif _check_for_numpy(key) and isinstance(key, np.ndarray):
+    if _check_for_numpy(key) and isinstance(key, np.ndarray):
         indices = _convert_np_ndarray_to_indices(key, s.len())
         return _select_elements_by_index(s, indices)
 
@@ -140,10 +140,9 @@ def get_df_item_by_key(
 
         if selection.is_empty():
             return selection
-        elif isinstance(selection, pl.Series):
+        if isinstance(selection, pl.Series):
             return get_series_item_by_key(selection, row_key)
-        else:
-            return _select_rows(selection, row_key)
+        return _select_rows(selection, row_key)
 
     # Single string input, e.g. df["a"]
     if isinstance(key, str):
@@ -175,10 +174,10 @@ def _select_columns(
     if isinstance(key, int):
         return df.to_series(key)
 
-    elif isinstance(key, str):
+    if isinstance(key, str):
         return df.get_column(key)
 
-    elif isinstance(key, slice):
+    if isinstance(key, slice):
         start, stop, step = key.start, key.stop, key.step
         # Fast path for common case: df[x, :]
         if start is None and stop is None and step is None:
@@ -191,38 +190,36 @@ def _select_columns(
         rng = range(df.width)[int_slice]
         return _select_columns_by_index(df, rng)
 
-    elif isinstance(key, range):
+    if isinstance(key, range):
         return _select_columns_by_index(df, key)
 
-    elif isinstance(key, Sequence):
+    if isinstance(key, Sequence):
         if not key:
             return df.__class__()
         first = key[0]
         if isinstance(first, bool):
             return _select_columns_by_mask(df, key)  # type: ignore[arg-type]
-        elif isinstance(first, int):
+        if isinstance(first, int):
             return _select_columns_by_index(df, key)  # type: ignore[arg-type]
-        elif isinstance(first, str):
+        if isinstance(first, str):
             return _select_columns_by_name(df, key)  # type: ignore[arg-type]
-        else:
-            msg = f"cannot select columns using Sequence with elements of type {type(first).__name__!r}"
-            raise TypeError(msg)
+        msg = f"cannot select columns using Sequence with elements of type {type(first).__name__!r}"
+        raise TypeError(msg)
 
-    elif isinstance(key, pl.Series):
+    if isinstance(key, pl.Series):
         if key.is_empty():
             return df.__class__()
         dtype = key.dtype
         if dtype == String:
             return _select_columns_by_name(df, key)
-        elif dtype.is_integer():
+        if dtype.is_integer():
             return _select_columns_by_index(df, key)
-        elif dtype == Boolean:
+        if dtype == Boolean:
             return _select_columns_by_mask(df, key)
-        else:
-            msg = f"cannot select columns using Series of type {dtype}"
-            raise TypeError(msg)
+        msg = f"cannot select columns using Series of type {dtype}"
+        raise TypeError(msg)
 
-    elif _check_for_numpy(key) and isinstance(key, np.ndarray):
+    if _check_for_numpy(key) and isinstance(key, np.ndarray):
         if key.ndim != 1:
             msg = "multi-dimensional NumPy arrays not supported as index"
             raise TypeError(msg)
@@ -233,13 +230,12 @@ def _select_columns(
         dtype_kind = key.dtype.kind
         if dtype_kind in ("i", "u"):
             return _select_columns_by_index(df, key)
-        elif dtype_kind == "b":
+        if dtype_kind == "b":
             return _select_columns_by_mask(df, key)
-        elif isinstance(key[0], str):
+        if isinstance(key[0], str):
             return _select_columns_by_name(df, key)
-        else:
-            msg = f"cannot select columns using NumPy array of type {key.dtype}"
-            raise TypeError(msg)
+        msg = f"cannot select columns using NumPy array of type {key.dtype}"
+        raise TypeError(msg)
 
     msg = f"cannot select columns using key of type {type(key).__name__!r}: {key!r}"
     raise TypeError(msg)
@@ -283,11 +279,11 @@ def _select_rows(
     if isinstance(key, slice):
         return _select_rows_by_slice(df, key)
 
-    elif isinstance(key, range):
+    if isinstance(key, range):
         key = range_to_slice(key)
         return _select_rows_by_slice(df, key)
 
-    elif isinstance(key, Sequence):
+    if isinstance(key, Sequence):
         if not key:
             return df.clear()
         if isinstance(key[0], bool):
@@ -296,17 +292,15 @@ def _select_rows(
         indices = _convert_series_to_indices(s, df.height)
         return _select_rows_by_index(df, indices)
 
-    elif isinstance(key, pl.Series):
+    if isinstance(key, pl.Series):
         indices = _convert_series_to_indices(key, df.height)
         return _select_rows_by_index(df, indices)
 
-    elif _check_for_numpy(key) and isinstance(key, np.ndarray):
+    if _check_for_numpy(key) and isinstance(key, np.ndarray):
         indices = _convert_np_ndarray_to_indices(key, df.height)
         return _select_rows_by_index(df, indices)
-
-    else:
-        msg = f"cannot select rows using key of type {type(key).__name__!r}: {key!r}"
-        raise TypeError(msg)
+    msg = f"cannot select rows using key of type {type(key).__name__!r}: {key!r}"
+    raise TypeError(msg)
 
 
 def _select_rows_by_slice(df: DataFrame, key: slice) -> DataFrame:

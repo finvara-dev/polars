@@ -50,8 +50,7 @@ class PolarsBuffer(Buffer):
             # Round up to the nearest byte
             if rest == 0:
                 return n_bytes
-            else:
-                return n_bytes + 1
+            return n_bytes + 1
 
         return self._data.len() * (dtype[1] // 8)
 

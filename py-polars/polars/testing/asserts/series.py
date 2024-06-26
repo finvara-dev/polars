@@ -328,20 +328,19 @@ def _categorical_dtype_to_string_dtype(dtype: DataType) -> DataType:
     """Change a (possibly nested) Categorical data type to a String data type."""
     if isinstance(dtype, Categorical):
         return String()
-    elif isinstance(dtype, List):
+    if isinstance(dtype, List):
         inner_cast = _categorical_dtype_to_string_dtype(dtype.inner)  # type: ignore[arg-type]
         return List(inner_cast)
-    elif isinstance(dtype, Array):
+    if isinstance(dtype, Array):
         inner_cast = _categorical_dtype_to_string_dtype(dtype.inner)  # type: ignore[arg-type]
         return Array(inner_cast, dtype.size)
-    elif isinstance(dtype, Struct):
+    if isinstance(dtype, Struct):
         fields = {
             f.name: _categorical_dtype_to_string_dtype(f.dtype)  # type: ignore[arg-type]
             for f in dtype.fields
         }
         return Struct(fields)
-    else:
-        return dtype
+    return dtype
 
 
 @deprecate_renamed_parameter("check_dtype", "check_dtypes", version="0.20.31")

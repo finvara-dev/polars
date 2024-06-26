@@ -135,12 +135,11 @@ def dtypes(
             ),
             max_leaves=nesting_level,
         )
-    else:
-        return _flat_dtypes(
-            allowed_dtypes=flat_dtypes,
-            excluded_dtypes=excluded_dtypes,
-            allow_time_zones=allow_time_zones,
-        )
+    return _flat_dtypes(
+        allowed_dtypes=flat_dtypes,
+        excluded_dtypes=excluded_dtypes,
+        allow_time_zones=allow_time_zones,
+    )
 
 
 def _parse_dtype_restrictions(
@@ -217,31 +216,30 @@ def _instantiate_flat_dtype(
     """Take a flat data type and instantiate it."""
     if isinstance(dtype, DataType):
         return dtype
-    elif dtype in _SIMPLE_DTYPES:
+    if dtype in _SIMPLE_DTYPES:
         return dtype()
-    elif dtype == Datetime:
+    if dtype == Datetime:
         time_unit = draw(_time_units())
         time_zone = draw(st.none() | _time_zones()) if allow_time_zones else None
         return Datetime(time_unit, time_zone)
-    elif dtype == Duration:
+    if dtype == Duration:
         time_unit = draw(_time_units())
         return Duration(time_unit)
-    elif dtype == Categorical:
+    if dtype == Categorical:
         ordering = draw(_categorical_orderings())
         return Categorical(ordering)
-    elif dtype == Enum:
+    if dtype == Enum:
         n_categories = draw(
             st.integers(min_value=1, max_value=_DEFAULT_ENUM_CATEGORIES_LIMIT)
         )
         categories = [f"c{i}" for i in range(n_categories)]
         return Enum(categories)
-    elif dtype == Decimal:
+    if dtype == Decimal:
         precision = draw(st.integers(min_value=1, max_value=38) | st.none())
         scale = draw(st.integers(min_value=0, max_value=precision or 38))
         return Decimal(precision, scale)
-    else:
-        msg = f"unsupported data type: {dtype}"
-        raise InvalidArgument(msg)
+    msg = f"unsupported data type: {dtype}"
+    raise InvalidArgument(msg)
 
 
 @st.composite
@@ -280,21 +278,20 @@ def _instantiate_nested_dtype(
     def instantiate_inner(inner_dtype: PolarsDataType | None) -> DataType:
         if inner_dtype is None:
             return draw(inner)
-        elif inner_dtype.is_nested():
+        if inner_dtype.is_nested():
             return draw(
                 _instantiate_nested_dtype(
                     inner_dtype, inner, allow_time_zones=allow_time_zones
                 )
             )
-        else:
-            return draw(
-                _instantiate_flat_dtype(inner_dtype, allow_time_zones=allow_time_zones)
-            )
+        return draw(
+            _instantiate_flat_dtype(inner_dtype, allow_time_zones=allow_time_zones)
+        )
 
     if dtype == List:
         inner_dtype = instantiate_inner(getattr(dtype, "inner", None))
         return List(inner_dtype)
-    elif dtype == Array:
+    if dtype == Array:
         inner_dtype = instantiate_inner(getattr(dtype, "inner", None))
         size = getattr(
             dtype,
@@ -302,7 +299,7 @@ def _instantiate_nested_dtype(
             draw(st.integers(min_value=1, max_value=_DEFAULT_ARRAY_WIDTH_LIMIT)),
         )
         return Array(inner_dtype, size)
-    elif dtype == Struct:
+    if dtype == Struct:
         if isinstance(dtype, Struct):
             fields = [Field(f.name, instantiate_inner(f.dtype)) for f in dtype.fields]
         else:
@@ -311,9 +308,8 @@ def _instantiate_nested_dtype(
             )
             fields = [Field(f"f{i}", draw(inner)) for i in range(n_fields)]
         return Struct(fields)
-    else:
-        msg = f"unsupported data type: {dtype}"
-        raise InvalidArgument(msg)
+    msg = f"unsupported data type: {dtype}"
+    raise InvalidArgument(msg)
 
 
 def _time_units() -> SearchStrategy[TimeUnit]:
@@ -372,21 +368,20 @@ def _instantiate_dtype(
                     allow_time_zones=allow_time_zones,
                 )
             )
-        else:
-            return draw(
-                _instantiate_dtype(
-                    dtype,
-                    allowed_dtypes=allowed_dtypes,
-                    excluded_dtypes=excluded_dtypes,
-                    nesting_level=nesting_level - 1,
-                    allow_time_zones=allow_time_zones,
-                )
+        return draw(
+            _instantiate_dtype(
+                dtype,
+                allowed_dtypes=allowed_dtypes,
+                excluded_dtypes=excluded_dtypes,
+                nesting_level=nesting_level - 1,
+                allow_time_zones=allow_time_zones,
             )
+        )
 
     if dtype == List:
         inner = draw_inner(getattr(dtype, "inner", None))
         return List(inner)
-    elif dtype == Array:
+    if dtype == Array:
         inner = draw_inner(getattr(dtype, "inner", None))
         size = getattr(
             dtype,
@@ -394,7 +389,7 @@ def _instantiate_dtype(
             draw(st.integers(min_value=1, max_value=_DEFAULT_ARRAY_WIDTH_LIMIT)),
         )
         return Array(inner, size)
-    elif dtype == Struct:
+    if dtype == Struct:
         if isinstance(dtype, Struct):
             fields = [
                 Field(
@@ -423,6 +418,5 @@ def _instantiate_dtype(
             )
             fields = [Field(f"f{i}", draw(inner_strategy)) for i in range(n_fields)]
         return Struct(fields)
-    else:
-        msg = f"unsupported data type: {dtype}"
-        raise InvalidArgument(msg)
+    msg = f"unsupported data type: {dtype}"
+    raise InvalidArgument(msg)

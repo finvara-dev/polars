@@ -70,8 +70,7 @@ def is_polars_dtype(
 
     if not include_unknown:
         return is_dtype and dtype != Unknown
-    else:
-        return is_dtype
+    return is_dtype
 
 
 def unpack_dtypes(
@@ -109,7 +108,7 @@ def unpack_dtypes(
     """  # noqa: W505
     if not dtypes:
         return set()
-    elif len(dtypes) == 1 and isinstance(dtypes[0], Collection):
+    if len(dtypes) == 1 and isinstance(dtypes[0], Collection):
         dtypes = dtypes[0]
 
     unpacked: set[PolarsDataType] = set()
@@ -308,7 +307,7 @@ def numpy_char_code_to_dtype(dtype_char: str) -> PolarsDataType:
     dtype = np.dtype(dtype_char)
     if dtype.kind == "U":
         return String
-    elif dtype.kind == "S":
+    if dtype.kind == "S":
         return Binary
     try:
         return DataTypeMappings.NUMPY_KIND_AND_ITEMSIZE_TO_DTYPE[
@@ -331,7 +330,7 @@ def maybe_cast(el: Any, dtype: PolarsDataType) -> Any:
     if isinstance(el, datetime):
         time_unit = getattr(dtype, "time_unit", "us")
         return datetime_to_int(el, time_unit)
-    elif isinstance(el, timedelta):
+    if isinstance(el, timedelta):
         time_unit = getattr(dtype, "time_unit", "us")
         return timedelta_to_int(el, time_unit)
 

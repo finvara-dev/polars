@@ -137,15 +137,14 @@ def _assert_correct_input_type(
 
     if isinstance(left, DataFrame) and isinstance(right, DataFrame):
         return False
-    elif isinstance(left, LazyFrame) and isinstance(right, LazyFrame):
+    if isinstance(left, LazyFrame) and isinstance(right, LazyFrame):
         return True
-    else:
-        raise_assertion_error(
-            "inputs",
-            "unexpected input types",
-            type(left).__name__,
-            type(right).__name__,
-        )
+    raise_assertion_error(
+        "inputs",
+        "unexpected input types",
+        type(left).__name__,
+        type(right).__name__,
+    )
 
 
 def _assert_frame_schema_equal(

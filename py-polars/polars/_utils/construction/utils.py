@@ -79,23 +79,22 @@ def nt_unpack(obj: Any) -> Any:
     """Recursively unpack a nested NamedTuple."""
     if isinstance(obj, dict):
         return {key: nt_unpack(value) for key, value in obj.items()}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [nt_unpack(value) for value in obj]
-    elif is_namedtuple(obj.__class__):
+    if is_namedtuple(obj.__class__):
         return {key: nt_unpack(value) for key, value in obj._asdict().items()}
-    elif isinstance(obj, tuple):
+    if isinstance(obj, tuple):
         return tuple(nt_unpack(value) for value in obj)
-    else:
-        return obj
+    return obj
 
 
 def contains_nested(value: Any, is_nested: Callable[[Any], bool]) -> bool:
     """Determine if value contains (or is) nested structured data."""
     if is_nested(value):
         return True
-    elif isinstance(value, dict):
+    if isinstance(value, dict):
         return any(contains_nested(v, is_nested) for v in value.values())
-    elif isinstance(value, (list, tuple)):
+    if isinstance(value, (list, tuple)):
         return any(contains_nested(v, is_nested) for v in value)
     return False
 

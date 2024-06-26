@@ -403,7 +403,7 @@ def read_database_uri(
             protocol=protocol,
             schema_overrides=schema_overrides,
         )
-    elif engine == "adbc":
+    if engine == "adbc":
         if not isinstance(query, str):
             msg = "only a single SQL query string is accepted for adbc"
             raise ValueError(msg)
@@ -413,6 +413,5 @@ def read_database_uri(
             schema_overrides=schema_overrides,
             execute_options=execute_options,
         )
-    else:
-        msg = f"engine must be one of {{'connectorx', 'adbc'}}, got {engine!r}"
-        raise ValueError(msg)
+    msg = f"engine must be one of {{'connectorx', 'adbc'}}, got {engine!r}"
+    raise ValueError(msg)

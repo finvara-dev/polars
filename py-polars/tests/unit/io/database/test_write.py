@@ -47,10 +47,9 @@ class TestWriteDatabase:
     def _get_connection(uri: str, engine: DbWriteEngine, uri_connection: bool) -> Any:
         if uri_connection:
             return uri
-        elif engine == "sqlalchemy":
+        if engine == "sqlalchemy":
             return create_engine(uri)
-        else:
-            return _open_adbc_connection(uri)
+        return _open_adbc_connection(uri)
 
     def test_write_database_create(
         self, engine: DbWriteEngine, uri_connection: bool, tmp_path: Path

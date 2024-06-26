@@ -676,17 +676,16 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
 
         if file is None:
             return serialize_to_string()
-        elif isinstance(file, StringIO):
+        if isinstance(file, StringIO):
             json_str = serialize_to_string()
             file.write(json_str)
             return None
-        elif isinstance(file, (str, Path)):
+        if isinstance(file, (str, Path)):
             file = normalize_filepath(file)
             self._ldf.serialize(file)
             return None
-        else:
-            self._ldf.serialize(file)
-            return None
+        self._ldf.serialize(file)
+        return None
 
     def pipe(
         self,
@@ -1065,13 +1064,11 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
             )
             if format == "tree":
                 return ldf.describe_optimized_plan_tree()
-            else:
-                return ldf.describe_optimized_plan()
+            return ldf.describe_optimized_plan()
 
         if format == "tree":
             return self._ldf.describe_plan_tree()
-        else:
-            return self._ldf.describe_plan()
+        return self._ldf.describe_plan()
 
     def show_graph(
         self,
@@ -1184,20 +1181,19 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
             from IPython.display import SVG, display
 
             return display(SVG(graph))
-        else:
-            import_optional(
-                "matplotlib",
-                err_prefix="",
-                err_suffix="should be installed to show graphs",
-            )
-            import matplotlib.image as mpimg
-            import matplotlib.pyplot as plt
+        import_optional(
+            "matplotlib",
+            err_prefix="",
+            err_suffix="should be installed to show graphs",
+        )
+        import matplotlib.image as mpimg
+        import matplotlib.pyplot as plt
 
-            plt.figure(figsize=figsize)
-            img = mpimg.imread(BytesIO(graph))
-            plt.imshow(img)
-            plt.show()
-            return None
+        plt.figure(figsize=figsize)
+        img = mpimg.imread(BytesIO(graph))
+        plt.imshow(img)
+        plt.show()
+        return None
 
     def inspect(self, fmt: str = "{}") -> LazyFrame:
         """
@@ -2979,7 +2975,7 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
         for p in predicates:
             if p is False:  # immediately disallows all rows
                 return self.clear()
-            elif p is True:
+            if p is True:
                 continue  # no-op; matches all rows
             if _is_generator(p):
                 p = tuple(p)
@@ -4529,10 +4525,9 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
         """
         if callable(mapping):
             return self.select(F.all().name.map(mapping))
-        else:
-            existing = list(mapping.keys())
-            new = list(mapping.values())
-            return self._from_pyldf(self._ldf.rename(existing, new))
+        existing = list(mapping.keys())
+        new = list(mapping.values())
+        return self._from_pyldf(self._ldf.rename(existing, new))
 
     def reverse(self) -> LazyFrame:
         """

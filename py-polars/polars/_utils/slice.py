@@ -87,23 +87,22 @@ class PolarsSlice:
         if self.slice_length == 0:
             return self.obj.clear()
 
-        elif self.is_unbounded and self.stride in (-1, 1):
+        if self.is_unbounded and self.stride in (-1, 1):
             return self.obj.reverse() if (self.stride < 0) else self.obj.clone()
 
-        elif self.start >= 0 and self.stop >= 0 and self.stride == 1:
+        if self.start >= 0 and self.stop >= 0 and self.stride == 1:
             return self.obj.slice(self.start, self.slice_length)
 
-        elif self.stride < 0 and self.slice_length == 1:
+        if self.stride < 0 and self.slice_length == 1:
             return self.obj.slice(self.stop + 1, 1)
-        else:
-            # multi-operation calls; make lazy
-            lazyobj = self._lazify(self.obj)
-            sliced = (
-                self._slice_positive(lazyobj)
-                if self.stride > 0
-                else self._slice_negative(lazyobj)
-            )
-            return self._as_original(sliced, self.obj)
+        # multi-operation calls; make lazy
+        lazyobj = self._lazify(self.obj)
+        sliced = (
+            self._slice_positive(lazyobj)
+            if self.stride > 0
+            else self._slice_negative(lazyobj)
+        )
+        return self._as_original(sliced, self.obj)
 
 
 class LazyPolarsSlice:
@@ -159,14 +158,14 @@ class LazyPolarsSlice:
         # [::k]  => gather_every(k),
         # [::-1] => reverse(),
         # [::-k] => reverse().gather_every(abs(k))
-        elif s.start is None and s.stop is None:
+        if s.start is None and s.stop is None:
             if step == 1:
                 return self.obj.clone()
-            elif step > 1:
+            if step > 1:
                 return self.obj.gather_every(step)
-            elif step == -1:
+            if step == -1:
                 return self.obj.reverse()
-            elif step < -1:
+            if step < -1:
                 return self.obj.reverse().gather_every(abs(step))
 
         # ---------------------------------------

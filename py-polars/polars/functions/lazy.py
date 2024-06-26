@@ -850,11 +850,10 @@ def corr(
 
     if method == "pearson":
         return wrap_expr(plr.pearson_corr(a, b, ddof))
-    elif method == "spearman":
+    if method == "spearman":
         return wrap_expr(plr.spearman_rank_corr(a, b, ddof, propagate_nans))
-    else:
-        msg = f"method must be one of {{'pearson', 'spearman'}}, got {method!r}"
-        raise ValueError(msg)
+    msg = f"method must be one of {{'pearson', 'spearman'}}, got {method!r}"
+    raise ValueError(msg)
 
 
 def cov(a: IntoExpr, b: IntoExpr, ddof: int = 1) -> Expr:
@@ -1950,9 +1949,8 @@ def arg_where(condition: Expr | Series, *, eager: bool = False) -> Expr | Series
             )
             raise ValueError(msg)
         return condition.to_frame().select(arg_where(F.col(condition.name))).to_series()
-    else:
-        condition = parse_into_expression(condition)
-        return wrap_expr(plr.arg_where(condition))
+    condition = parse_into_expression(condition)
+    return wrap_expr(plr.arg_where(condition))
 
 
 def coalesce(exprs: IntoExpr | Iterable[IntoExpr], *more_exprs: IntoExpr) -> Expr:
@@ -2068,13 +2066,12 @@ def from_epoch(
 
     if time_unit == "d":
         return column.cast(Date)
-    elif time_unit == "s":
+    if time_unit == "s":
         return (column.cast(Int64) * 1_000_000).cast(Datetime("us"))
-    elif time_unit in DTYPE_TEMPORAL_UNITS:
+    if time_unit in DTYPE_TEMPORAL_UNITS:
         return column.cast(Datetime(time_unit))
-    else:
-        msg = f"`time_unit` must be one of {{'ns', 'us', 'ms', 's', 'd'}}, got {time_unit!r}"
-        raise ValueError(msg)
+    msg = f"`time_unit` must be one of {{'ns', 'us', 'ms', 's', 'd'}}, got {time_unit!r}"
+    raise ValueError(msg)
 
 
 @unstable()
@@ -2218,5 +2215,4 @@ def sql_expr(sql: str | Sequence[str]) -> Expr | list[Expr]:
     """
     if isinstance(sql, str):
         return wrap_expr(plr.sql_expr(sql))
-    else:
-        return [wrap_expr(plr.sql_expr(q)) for q in sql]
+    return [wrap_expr(plr.sql_expr(q)) for q in sql]

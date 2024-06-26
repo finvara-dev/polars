@@ -568,5 +568,4 @@ def _handle_null_probability_deprecation(
 
     if isinstance(null_probability, Mapping):
         return {col: prob_to_bool(prob) for col, prob in null_probability.items()}
-    else:
-        return prob_to_bool(null_probability)
+    return prob_to_bool(null_probability)
