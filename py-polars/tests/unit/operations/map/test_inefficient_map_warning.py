@@ -1,5 +1,5 @@
-import ast
 from __future__ import annotations
+import ast
 
 import datetime as dt
 import json
@@ -11,7 +11,6 @@ from math import cosh
 from typing import Any, Callable
 
 import numpy
-import numpy as np  # noqa: F401
 import pytest
 
 import polars as pl

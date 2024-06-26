@@ -1,5 +1,5 @@
-import ast
 from __future__ import annotations
+import ast
 
 from datetime import date, datetime, time, timedelta, timezone
 
