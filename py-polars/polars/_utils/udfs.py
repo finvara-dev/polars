@@ -927,13 +927,12 @@ class RewrittenInstructions:
                             self._caller_variables = _get_all_caller_variables()
                         if (expr_name := inst1.argval) not in self._caller_variables:
                             continue
-                        else:
-                            module_name = self._caller_variables[expr_name].__module__
-                            if not any((module_name in m) for m in module_aliases):
-                                continue
-                            expr_name = _MODULE_FUNC_TO_EXPR_NAME.get(
-                                f"{module_name}.{expr_name}", expr_name
-                            )
+                        module_name = self._caller_variables[expr_name].__module__
+                        if not any((module_name in m) for m in module_aliases):
+                            continue
+                        expr_name = _MODULE_FUNC_TO_EXPR_NAME.get(
+                            f"{module_name}.{expr_name}", expr_name
+                        )
                     elif inst1.argval == "json":
                         expr_name = "str.json_decode"
                     elif inst1.argval == "datetime":
