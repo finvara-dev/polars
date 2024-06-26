@@ -1,3 +1,4 @@
+import ast
 from __future__ import annotations
 
 from datetime import date, datetime, time, timedelta, timezone
@@ -39,7 +40,7 @@ def test_to_init_repr() -> None:
             .collect()
         )
 
-        result = eval(df.to_init_repr().replace("datetime.", ""))
+        result = ast.literal_eval(df.to_init_repr().replace("datetime.", ""))
         expected = df
         # drop "object" because it can not be compared by assert_frame_equal
         assert_frame_equal(result.drop("object"), expected.drop("object"))
@@ -68,7 +69,7 @@ def test_to_init_repr_nested_dtype() -> None:
         },
     ).collect()
 
-    assert_frame_equal(eval(df.to_init_repr()), df)
+    assert_frame_equal(ast.literal_eval(df.to_init_repr()), df)
 
 
 def test_to_init_repr_nested_dtype_roundtrip() -> None:
@@ -94,4 +95,4 @@ def test_to_init_repr_nested_dtype_roundtrip() -> None:
         },
     ).collect()
 
-    assert_frame_equal(eval(df.to_init_repr()), df)
+    assert_frame_equal(ast.literal_eval(df.to_init_repr()), df)

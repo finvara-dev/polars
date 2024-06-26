@@ -1,3 +1,4 @@
+import ast
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -140,7 +141,7 @@ def test_meta_tree_format(namespace_files_path: Path) -> None:
     for test_set in test_sets:
         expression = test_set.strip().split("\n")[0]
         tree_fmt = "\n".join(test_set.strip().split("\n")[1:])
-        e = eval(expression)
+        e = ast.literal_eval(expression)
         result = e.meta.tree_format(return_as_string=True)
         result = "\n".join(s.rstrip() for s in result.split("\n"))
         assert result.strip() == tree_fmt.strip()

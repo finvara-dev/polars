@@ -1,3 +1,4 @@
+import ast
 import operator
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
@@ -658,7 +659,7 @@ def test_raise_invalid_temporal(a: pl.DataType, b: pl.DataType, op: str) -> None
     _df = pl.DataFrame([a, b])
 
     with pytest.raises(InvalidOperationError):
-        eval(f"_df.select(pl.col('a') {op} pl.col('b'))")
+        ast.literal_eval(f"_df.select(pl.col('a') {op} pl.col('b'))")
 
 
 def test_arithmetic_duration_div_multiply() -> None:

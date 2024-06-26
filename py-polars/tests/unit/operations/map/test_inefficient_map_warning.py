@@ -1,3 +1,4 @@
+import ast
 from __future__ import annotations
 
 import datetime as dt
@@ -270,7 +271,7 @@ EVAL_ENVIRONMENT = {
 )
 def test_parse_invalid_function(func: str) -> None:
     # functions we don't (yet?) offer suggestions for
-    parser = BytecodeParser(eval(func), map_target="expr")
+    parser = BytecodeParser(ast.literal_eval(func), map_target="expr")
     assert not parser.can_attempt_rewrite() or not parser.to_expression("x")
 
 
@@ -287,7 +288,7 @@ def test_parse_apply_functions(col: str, func: str, expr_repr: str) -> None:
         PolarsInefficientMapWarning,
         match=r"(?s)Expr\.map_elements.*with this one instead",
     ):
-        parser = BytecodeParser(eval(func), map_target="expr")
+        parser = BytecodeParser(ast.literal_eval(func), map_target="expr")
         suggested_expression = parser.to_expression(col)
         assert suggested_expression == expr_repr
 
@@ -308,11 +309,11 @@ def test_parse_apply_functions(col: str, func: str, expr_repr: str) -> None:
 
         result_frame = df.select(
             x=col,
-            y=eval(suggested_expression, EVAL_ENVIRONMENT),
+            y=ast.literal_eval(suggested_expression, EVAL_ENVIRONMENT),
         )
         expected_frame = df.select(
             x=pl.col(col),
-            y=pl.col(col).map_elements(eval(func)),
+            y=pl.col(col).map_elements(ast.literal_eval(func)),
         )
         assert_frame_equal(
             result_frame,
@@ -468,7 +469,7 @@ def test_parse_apply_series(
         assert suggested_expression == expr_repr
 
         expected_series = s.map_elements(func)
-        result_series = eval(suggested_expression)
+        result_series = ast.literal_eval(suggested_expression)
         assert_series_equal(expected_series, result_series)
 
 

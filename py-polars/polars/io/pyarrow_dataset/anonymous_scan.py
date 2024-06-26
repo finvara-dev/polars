@@ -1,3 +1,4 @@
+import ast
 from __future__ import annotations
 
 from functools import partial
@@ -79,7 +80,7 @@ def _scan_pyarrow_dataset_impl(
         )
         from polars.datatypes import Date, Datetime, Duration
 
-        _filter = eval(
+        _filter = ast.literal_eval(
             predicate,
             {
                 "pa": pa,
