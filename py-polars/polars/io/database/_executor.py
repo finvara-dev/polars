@@ -192,7 +192,7 @@ class ConnectionExecutor:
             rows = result.fetchmany(batch_size)
             if not rows:
                 break
-            elif isinstance(rows[0], (list, tuple, dict)):
+            if isinstance(rows[0], (list, tuple, dict)):
                 yield rows
             else:
                 yield [tuple(row) for row in rows]
