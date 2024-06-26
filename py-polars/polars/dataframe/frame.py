@@ -933,8 +933,7 @@ class DataFrame:
         """Compare a DataFrame with another object."""
         if isinstance(other, DataFrame):
             return self._compare_to_other_df(other, op)
-        else:
-            return self._compare_to_non_df(other, op)
+        return self._compare_to_non_df(other, op)
 
     def _compare_to_other_df(
         self,
@@ -980,19 +979,18 @@ class DataFrame:
         warn_null_comparison(other)
         if op == "eq":
             return self.select(F.all() == other)
-        elif op == "neq":
+        if op == "neq":
             return self.select(F.all() != other)
-        elif op == "gt":
+        if op == "gt":
             return self.select(F.all() > other)
-        elif op == "lt":
+        if op == "lt":
             return self.select(F.all() < other)
-        elif op == "gt_eq":
+        if op == "gt_eq":
             return self.select(F.all() >= other)
-        elif op == "lt_eq":
+        if op == "lt_eq":
             return self.select(F.all() <= other)
-        else:
-            msg = f"unexpected comparison operator {op!r}"
-            raise ValueError(msg)
+        msg = f"unexpected comparison operator {op!r}"
+        raise ValueError(msg)
 
     def _div(self, other: Any, *, floordiv: bool) -> DataFrame:
         if isinstance(other, pl.Series):
@@ -1000,7 +998,7 @@ class DataFrame:
                 return self.select(F.all() // lit(other))
             return self.select(F.all() / lit(other))
 
-        elif not isinstance(other, DataFrame):
+        if not isinstance(other, DataFrame):
             s = _prepare_other_arg(other, length=len(self))
             other = DataFrame([s.alias(f"n{i}") for i in range(len(self.columns))])
 
@@ -1350,7 +1348,7 @@ class DataFrame:
                 raise ValueError(msg)
             return self._df.to_series(0).get_index(0)
 
-        elif row is None or column is None:
+        if row is None or column is None:
             msg = "cannot call `.item()` with only one of `row` or `column`"
             raise ValueError(msg)
 
@@ -1502,8 +1500,7 @@ class DataFrame:
         """
         if as_series:
             return {s.name: s for s in self}
-        else:
-            return {s.name: s.to_list() for s in self}
+        return {s.name: s.to_list() for s in self}
 
     def to_dicts(self) -> list[dict[str, Any]]:
         """
@@ -1858,7 +1855,7 @@ class DataFrame:
                     a=frame.to_numpy(writable=False, order=order),
                     order="K",
                 )
-            elif return_type == "dict":
+            if return_type == "dict":
                 if label is not None:
                     # return a {"label": array(s), "features": array(s)} dict
                     label_frame = frame.select(label)
@@ -1871,9 +1868,8 @@ class DataFrame:
                         "label": label_frame.to_jax(),
                         "features": features_frame.to_jax(),
                     }
-                else:
-                    # return a {"col": array} dict
-                    return {srs.name: srs.to_jax() for srs in frame}
+                # return a {"col": array} dict
+                return {srs.name: srs.to_jax() for srs in frame}
             else:
                 valid_jax_types = ", ".join(get_args(JaxExportType))
                 msg = f"invalid `return_type`: {return_type!r}\nExpected one of: {valid_jax_types}"
@@ -2074,7 +2070,7 @@ class DataFrame:
             # note: torch tensors are not immutable, so we must consider them writable
             return torch.from_numpy(frame.to_numpy(writable=True))
 
-        elif return_type == "dict":
+        if return_type == "dict":
             if label is not None:
                 # return a {"label": tensor(s), "features": tensor(s)} dict
                 label_frame = frame.select(label)
@@ -2087,9 +2083,8 @@ class DataFrame:
                     "label": label_frame.to_torch(),
                     "features": features_frame.to_torch(),
                 }
-            else:
-                # return a {"col": tensor} dict
-                return {srs.name: srs.to_torch() for srs in frame}
+            # return a {"col": tensor} dict
+            return {srs.name: srs.to_torch() for srs in frame}
 
         elif return_type == "dataset":
             # return a torch Dataset object
@@ -2388,17 +2383,16 @@ class DataFrame:
 
         if file is None:
             return serialize_to_string()
-        elif isinstance(file, StringIO):
+        if isinstance(file, StringIO):
             json_str = serialize_to_string()
             file.write(json_str)
             return None
-        elif isinstance(file, (str, Path)):
+        if isinstance(file, (str, Path)):
             file = normalize_filepath(file)
             self._df.serialize(file)
             return None
-        else:
-            self._df.serialize(file)
-            return None
+        self._df.serialize(file)
+        return None
 
     @overload
     def write_json(self, file: None = ...) -> str: ...
@@ -2440,17 +2434,16 @@ class DataFrame:
 
         if file is None:
             return write_json_to_string()
-        elif isinstance(file, StringIO):
+        if isinstance(file, StringIO):
             json_str = write_json_to_string()
             file.write(json_str)
             return None
-        elif isinstance(file, (str, Path)):
+        if isinstance(file, (str, Path)):
             file = normalize_filepath(file)
             self._df.write_json(file)
             return None
-        else:
-            self._df.write_json(file)
-            return None
+        self._df.write_json(file)
+        return None
 
     @overload
     def write_ndjson(self, file: None = None) -> str: ...
@@ -2488,17 +2481,16 @@ class DataFrame:
 
         if file is None:
             return write_ndjson_to_string()
-        elif isinstance(file, StringIO):
+        if isinstance(file, StringIO):
             ndjson_str = write_ndjson_to_string()
             file.write(ndjson_str)
             return None
-        elif isinstance(file, (str, Path)):
+        if isinstance(file, (str, Path)):
             file = normalize_filepath(file)
             self._df.write_ndjson(file)
             return None
-        else:
-            self._df.write_ndjson(file)
-            return None
+        self._df.write_ndjson(file)
+        return None
 
     @overload
     def write_csv(
@@ -3734,7 +3726,7 @@ class DataFrame:
                 conn.commit()
             return n_rows
 
-        elif engine == "sqlalchemy":
+        if engine == "sqlalchemy":
             if not _PANDAS_AVAILABLE:
                 msg = "writing with 'sqlalchemy' engine currently requires pandas.\n\nInstall with: pip install pandas"
                 raise ModuleNotFoundError(msg)
@@ -3774,7 +3766,7 @@ class DataFrame:
             )
             return -1 if res is None else res
 
-        elif isinstance(engine, str):
+        if isinstance(engine, str):
             msg = f"engine {engine!r} is not supported"
             raise ValueError(msg)
         else:
@@ -3985,25 +3977,23 @@ class DataFrame:
                 dt = target
 
             return dt.merge(data, **delta_merge_options)
+        if delta_write_options is None:
+            delta_write_options = {}
 
-        else:
-            if delta_write_options is None:
-                delta_write_options = {}
+        if overwrite_schema:
+            delta_write_options["schema_mode"] = "overwrite"
 
-            if overwrite_schema:
-                delta_write_options["schema_mode"] = "overwrite"
-
-            schema = delta_write_options.pop("schema", None)
-            write_deltalake(
-                table_or_uri=target,
-                data=data,
-                schema=schema,
-                mode=mode,
-                storage_options=storage_options,
-                large_dtypes=True,
-                **delta_write_options,
-            )
-            return None
+        schema = delta_write_options.pop("schema", None)
+        write_deltalake(
+            table_or_uri=target,
+            data=data,
+            schema=schema,
+            mode=mode,
+            storage_options=storage_options,
+            large_dtypes=True,
+            **delta_write_options,
+        )
+        return None
 
     def estimated_size(self, unit: SizeUnit = "b") -> int | float:
         """
@@ -6845,8 +6835,7 @@ class DataFrame:
         out, is_df = self._df.map_rows(function, return_dtype, inference_size)
         if is_df:
             return self._from_pydf(out)
-        else:
-            return wrap_s(out).to_frame()
+        return wrap_s(out).to_frame()
 
     def hstack(
         self, columns: list[Series] | DataFrame, *, in_place: bool = False
@@ -6888,8 +6877,7 @@ class DataFrame:
         if in_place:
             self._df.hstack_mut([s._s for s in columns])
             return self
-        else:
-            return self._from_pydf(self._df.hstack([s._s for s in columns]))
+        return self._from_pydf(self._df.hstack([s._s for s in columns]))
 
     def vstack(self, other: DataFrame, *, in_place: bool = False) -> DataFrame:
         """
@@ -6942,8 +6930,7 @@ class DataFrame:
                 if str(exc) == "Already mutably borrowed":
                     self._df.vstack_mut(other._df.clone())
                     return self
-                else:
-                    raise
+                raise
             else:
                 return self
 
@@ -8776,14 +8763,13 @@ class DataFrame:
         """
         if strategy == "first":
             return self._df.n_chunks()
-        elif strategy == "all":
+        if strategy == "all":
             return [s.n_chunks() for s in self.__iter__()]
-        else:
-            msg = (
-                f"unexpected input for `strategy`: {strategy!r}"
-                f"\n\nChoose one of {{'first', 'all'}}"
-            )
-            raise ValueError(msg)
+        msg = (
+            f"unexpected input for `strategy`: {strategy!r}"
+            f"\n\nChoose one of {{'first', 'all'}}"
+        )
+        raise ValueError(msg)
 
     def max(self) -> DataFrame:
         """
@@ -9753,8 +9739,7 @@ class DataFrame:
             row = self._df.row_tuple(index)
             if named:
                 return dict(zip(self.columns, row))
-            else:
-                return row
+            return row
 
         elif by_predicate is not None:
             if not isinstance(by_predicate, pl.Expr):
@@ -9772,8 +9757,7 @@ class DataFrame:
             row = rows[0]
             if named:
                 return dict(zip(self.columns, row))
-            else:
-                return row
+            return row
         else:
             msg = "one of `index` or `by_predicate` must be set"
             raise ValueError(msg)
@@ -9846,8 +9830,7 @@ class DataFrame:
             # Load these into the local namespace for a minor performance boost
             dict_, zip_, columns = dict, zip, self.columns
             return [dict_(zip_(columns, row)) for row in self._df.row_tuples()]
-        else:
-            return self._df.row_tuples()
+        return self._df.row_tuples()
 
     def rows_by_key(
         self,
@@ -10213,10 +10196,9 @@ class DataFrame:
         if in_place:
             self._df.shrink_to_fit()
             return self
-        else:
-            df = self.clone()
-            df._df.shrink_to_fit()
-            return df
+        df = self.clone()
+        df._df.shrink_to_fit()
+        return df
 
     def gather_every(self, n: int, offset: int = 0) -> DataFrame:
         """

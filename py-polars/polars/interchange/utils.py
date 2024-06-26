@@ -65,7 +65,7 @@ def polars_dtype_to_dtype(dtype: PolarsDataType) -> Dtype:
     # Handle instantiated data types
     if isinstance(dtype, Datetime):
         return _datetime_to_dtype(dtype)
-    elif isinstance(dtype, Duration):
+    if isinstance(dtype, Duration):
         return _duration_to_dtype(dtype)
 
     return result
@@ -115,7 +115,7 @@ def dtype_to_polars_dtype(dtype: Dtype) -> PolarsDataType:
 
     if kind == DtypeKind.DATETIME:
         return _temporal_dtype_to_polars_dtype(format_str, dtype)
-    elif kind == DtypeKind.CATEGORICAL:
+    if kind == DtypeKind.CATEGORICAL:
         return Enum
 
     try:
@@ -133,11 +133,11 @@ def _temporal_dtype_to_polars_dtype(format_str: str, dtype: Dtype) -> PolarsData
             time_unit=time_unit,  # type: ignore[arg-type]
             time_zone=time_zone,
         )
-    elif format_str == "tdD":
+    if format_str == "tdD":
         return Date
-    elif format_str == "ttu":
+    if format_str == "ttu":
         return Time
-    elif (match := re.fullmatch(r"tD([mun])", format_str)) is not None:
+    if (match := re.fullmatch(r"tD([mun])", format_str)) is not None:
         time_unit = match.group(1) + "s"
         return Duration(time_unit=time_unit)  # type: ignore[arg-type]
 
@@ -159,11 +159,11 @@ def polars_dtype_to_data_buffer_dtype(dtype: PolarsDataType) -> PolarsDataType:
     """Get the data type of the data buffer."""
     if dtype.is_integer() or dtype.is_float() or dtype == Boolean:
         return dtype
-    elif dtype.is_temporal():
+    if dtype.is_temporal():
         return Int32 if dtype == Date else Int64
-    elif dtype == String:
+    if dtype == String:
         return UInt8
-    elif dtype in (Enum, Categorical):
+    if dtype in (Enum, Categorical):
         return UInt32
 
     msg = f"unsupported data type: {dtype}"

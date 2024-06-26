@@ -137,6 +137,5 @@ class BatchedCsvReader:
                 return [
                     _update_columns(wrap_df(df), self.new_columns) for df in batches
                 ]
-            else:
-                return [wrap_df(df) for df in batches]
+            return [wrap_df(df) for df in batches]
         return None

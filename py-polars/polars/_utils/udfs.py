@@ -305,7 +305,7 @@ def _get_target_name(col: str, expression: str, map_target: str) -> str:
     col_expr = f'pl.col("{col}")'
     if map_target == "expr":
         return col_expr
-    elif map_target == "series":
+    if map_target == "series":
         if re.match(r"^(s|srs\d?|series)\.", expression):
             return expression.split(".", 1)[0]
         # note: handle overlapping name from global variables; fallback
@@ -500,14 +500,12 @@ class BytecodeParser:
         # constant value (e.g. `lambda x: CONST + 123`), so we don't want to warn
         if "pl.col(" not in polars_expr:
             return None
-        else:
-            polars_expr = self._omit_implicit_bool(polars_expr)
-            if self._map_target == "series":
-                if (target_name := self._map_target_name) is None:
-                    target_name = _get_target_name(col, polars_expr, self._map_target)
-                return polars_expr.replace(f'pl.col("{col}")', target_name)
-            else:
-                return polars_expr
+        polars_expr = self._omit_implicit_bool(polars_expr)
+        if self._map_target == "series":
+            if (target_name := self._map_target_name) is None:
+                target_name = _get_target_name(col, polars_expr, self._map_target)
+            return polars_expr.replace(f'pl.col("{col}")', target_name)
+        return polars_expr
 
     def warn(
         self,
@@ -592,24 +590,23 @@ class InstructionTranslator:
         """Convert bytecode instruction to suitable intermediate op string."""
         if inst.opname in OpNames.CONTROL_FLOW:
             return OpNames.CONTROL_FLOW[inst.opname]
-        elif inst.argrepr:
+        if inst.argrepr:
             return inst.argrepr
-        elif inst.opname == "IS_OP":
+        if inst.opname == "IS_OP":
             return "is not" if inst.argval else "is"
-        elif inst.opname == "CONTAINS_OP":
+        if inst.opname == "CONTAINS_OP":
             return "not in" if inst.argval else "in"
-        elif inst.opname in OpNames.UNARY:
+        if inst.opname in OpNames.UNARY:
             return OpNames.UNARY[inst.opname]
-        elif inst.opname == "BINARY_SUBSCR":
+        if inst.opname == "BINARY_SUBSCR":
             return "replace_strict"
-        else:
-            msg = (
-                "unrecognized opname"
-                "\n\nPlease report a bug to https://github.com/pola-rs/polars/issues"
-                " with the content of function you were passing to `map` and the"
-                f" following instruction object:\n{inst!r}"
-            )
-            raise AssertionError(msg)
+        msg = (
+            "unrecognized opname"
+            "\n\nPlease report a bug to https://github.com/pola-rs/polars/issues"
+            " with the content of function you were passing to `map` and the"
+            f" following instruction object:\n{inst!r}"
+        )
+        raise AssertionError(msg)
 
     def _expr(self, value: StackEntry, col: str, param_name: str, depth: int) -> str:
         """Take stack entry value and convert to polars expression string."""
@@ -642,37 +639,35 @@ class InstructionTranslator:
                         pfx = ""
                     return f"{pfx}{op}({e1})"
                 return f"{op}{e1}"
-            else:
-                e2 = self._expr(value.right_operand, col, param_name, depth + 1)
-                if op in ("is", "is not") and value[2] == "None":
-                    not_ = "" if op == "is" else "not_"
-                    return f"{e1}.is_{not_}null()"
-                elif op in ("in", "not in"):
-                    not_ = "" if op == "in" else "~"
-                    return (
-                        f"{not_}({e1}.is_in({e2}))"
-                        if " " in e1
-                        else f"{not_}{e1}.is_in({e2})"
-                    )
-                elif op == "replace_strict":
-                    if not self._caller_variables:
-                        self._caller_variables = _get_all_caller_variables()
-                    if not isinstance(self._caller_variables.get(e1, None), dict):
-                        msg = "require dict mapping"
-                        raise NotImplementedError(msg)
-                    return f"{e2}.{op}({e1})"
-                elif op == "<<":
-                    # Result of 2**e2 might be float is e2 was negative.
-                    # But, if e1 << e2 was valid, then e2 must have been positive.
-                    # Hence, the output of 2**e2 can be safely cast to Int64, which
-                    # may be necessary if chaining operations which assume Int64 output.
-                    return f"({e1} * 2**{e2}).cast(pl.Int64)"
-                elif op == ">>":
-                    # Motivation for the cast is the same as in the '<<' case above.
-                    return f"({e1} / 2**{e2}).cast(pl.Int64)"
-                else:
-                    expr = f"{e1} {op} {e2}"
-                    return f"({expr})" if depth else expr
+            e2 = self._expr(value.right_operand, col, param_name, depth + 1)
+            if op in ("is", "is not") and value[2] == "None":
+                not_ = "" if op == "is" else "not_"
+                return f"{e1}.is_{not_}null()"
+            if op in ("in", "not in"):
+                not_ = "" if op == "in" else "~"
+                return (
+                    f"{not_}({e1}.is_in({e2}))"
+                    if " " in e1
+                    else f"{not_}{e1}.is_in({e2})"
+                )
+            if op == "replace_strict":
+                if not self._caller_variables:
+                    self._caller_variables = _get_all_caller_variables()
+                if not isinstance(self._caller_variables.get(e1, None), dict):
+                    msg = "require dict mapping"
+                    raise NotImplementedError(msg)
+                return f"{e2}.{op}({e1})"
+            if op == "<<":
+                # Result of 2**e2 might be float is e2 was negative.
+                # But, if e1 << e2 was valid, then e2 must have been positive.
+                # Hence, the output of 2**e2 can be safely cast to Int64, which
+                # may be necessary if chaining operations which assume Int64 output.
+                return f"({e1} * 2**{e2}).cast(pl.Int64)"
+            if op == ">>":
+                # Motivation for the cast is the same as in the '<<' case above.
+                return f"({e1} / 2**{e2}).cast(pl.Int64)"
+            expr = f"{e1} {op} {e2}"
+            return f"({expr})" if depth else expr
 
         elif value == param_name:
             return f'pl.col("{col}")'
@@ -1051,10 +1046,10 @@ def _raw_function_meta(function: Callable[[Any], Any]) -> tuple[str, str]:
         return "np", f"{func_name}()"
 
     # python function calls
-    elif func_module == "builtins":
+    if func_module == "builtins":
         if func_name in _PYTHON_CASTS_MAP:
             return "builtins", f"cast(pl.{_PYTHON_CASTS_MAP[func_name]})"
-        elif func_name in _MATH_FUNCTIONS:
+        if func_name in _MATH_FUNCTIONS:
             import math
 
             if function is getattr(math, func_name):

@@ -26,11 +26,10 @@ class StructNameSpace:
     def __getitem__(self, item: int | str) -> Series:
         if isinstance(item, int):
             return self.field(self.fields[item])
-        elif isinstance(item, str):
+        if isinstance(item, str):
             return self.field(item)
-        else:
-            msg = f"expected type 'int | str', got {type(item).__name__!r}"
-            raise TypeError(msg)
+        msg = f"expected type 'int | str', got {type(item).__name__!r}"
+        raise TypeError(msg)
 
     def _ipython_key_completions_(self) -> list[str]:
         return self.fields

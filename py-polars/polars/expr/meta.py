@@ -301,17 +301,16 @@ class ExprMetaNameSpace:
 
         if file is None:
             return serialize_to_string()
-        elif isinstance(file, StringIO):
+        if isinstance(file, StringIO):
             json_str = serialize_to_string()
             file.write(json_str)
             return None
-        elif isinstance(file, (str, Path)):
+        if isinstance(file, (str, Path)):
             file = normalize_filepath(file)
             self._pyexpr.serialize(file)
             return None
-        else:
-            self._pyexpr.serialize(file)
-            return None
+        self._pyexpr.serialize(file)
+        return None
 
     @overload
     def write_json(self, file: None = ...) -> str: ...
@@ -352,6 +351,5 @@ class ExprMetaNameSpace:
         s = self._pyexpr.meta_tree_format()
         if return_as_string:
             return s
-        else:
-            print(s)
-            return None
+        print(s)
+        return None

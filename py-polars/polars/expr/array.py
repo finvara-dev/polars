@@ -727,9 +727,8 @@ class ExprArrayNameSpace:
             field_names = list(fields)
             pyexpr = self._pyexpr.arr_to_struct(None)
             return wrap_expr(pyexpr).struct.rename_fields(field_names)
-        else:
-            pyexpr = self._pyexpr.arr_to_struct(fields)
-            return wrap_expr(pyexpr)
+        pyexpr = self._pyexpr.arr_to_struct(fields)
+        return wrap_expr(pyexpr)
 
     def shift(self, n: int | IntoExprColumn = 1) -> Expr:
         """

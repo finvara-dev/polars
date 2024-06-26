@@ -608,8 +608,7 @@ def struct(
 
     if eager:
         return F.select(expr).to_series()
-    else:
-        return expr
+    return expr
 
 
 def concat_str(

@@ -100,7 +100,7 @@ def lit(
             )
         return expr
 
-    elif isinstance(value, timedelta):
+    if isinstance(value, timedelta):
         if dtype is not None and (tu := getattr(dtype, "time_unit", "us")) is not None:
             time_unit = tu  # type: ignore[assignment]
         else:
@@ -109,25 +109,25 @@ def lit(
         td_int = timedelta_to_int(value, time_unit)
         return lit(td_int).cast(Duration(time_unit))
 
-    elif isinstance(value, time):
+    if isinstance(value, time):
         time_int = time_to_int(value)
         return lit(time_int).cast(Time)
 
-    elif isinstance(value, date):
+    if isinstance(value, date):
         date_int = date_to_int(value)
         return lit(date_int).cast(Date)
 
-    elif isinstance(value, pl.Series):
+    if isinstance(value, pl.Series):
         value = value._s
         return wrap_expr(plr.lit(value, allow_object))
 
-    elif _check_for_numpy(value) and isinstance(value, np.ndarray):
+    if _check_for_numpy(value) and isinstance(value, np.ndarray):
         return lit(pl.Series("literal", value, dtype=dtype))
 
-    elif isinstance(value, (list, tuple)):
+    if isinstance(value, (list, tuple)):
         return lit(pl.Series("literal", [value], dtype=dtype))
 
-    elif isinstance(value, enum.Enum):
+    if isinstance(value, enum.Enum):
         lit_value = value.value
         if dtype is None and isinstance(value, str):
             dtype = Enum(m.value for m in type(value))

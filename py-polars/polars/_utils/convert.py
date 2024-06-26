@@ -72,8 +72,7 @@ def negate_duration_string(duration: str) -> str:
     """Negate a Polars duration string."""
     if duration.startswith("-"):
         return duration[1:]
-    else:
-        return f"-{duration}"
+    return f"-{duration}"
 
 
 def date_to_int(d: date) -> int:
@@ -101,12 +100,11 @@ def datetime_to_int(dt: datetime, time_unit: TimeUnit) -> int:
 
     if time_unit == "us":
         return seconds * US_PER_SECOND + microseconds
-    elif time_unit == "ns":
+    if time_unit == "ns":
         return seconds * NS_PER_SECOND + microseconds * 1_000
-    elif time_unit == "ms":
+    if time_unit == "ms":
         return seconds * MS_PER_SECOND + microseconds // 1_000
-    else:
-        _raise_invalid_time_unit(time_unit)
+    _raise_invalid_time_unit(time_unit)
 
 
 def timedelta_to_int(td: timedelta, time_unit: TimeUnit) -> int:
@@ -116,12 +114,11 @@ def timedelta_to_int(td: timedelta, time_unit: TimeUnit) -> int:
 
     if time_unit == "us":
         return seconds * US_PER_SECOND + microseconds
-    elif time_unit == "ns":
+    if time_unit == "ns":
         return seconds * NS_PER_SECOND + microseconds * 1_000
-    elif time_unit == "ms":
+    if time_unit == "ms":
         return seconds * MS_PER_SECOND + microseconds // 1_000
-    else:
-        _raise_invalid_time_unit(time_unit)
+    _raise_invalid_time_unit(time_unit)
 
 
 @lru_cache(256)
@@ -161,12 +158,11 @@ def to_py_datetime(
 
     if time_zone is None:
         return EPOCH + td
-    elif _ZONEINFO_AVAILABLE:
+    if _ZONEINFO_AVAILABLE:
         dt = EPOCH_UTC + td
         return _localize_datetime(dt, time_zone)
-    else:
-        msg = "install polars[timezone] to handle datetimes with time zone information"
-        raise ImportError(msg)
+    msg = "install polars[timezone] to handle datetimes with time zone information"
+    raise ImportError(msg)
 
 
 def _localize_datetime(dt: datetime, time_zone: str) -> datetime:
@@ -215,12 +211,11 @@ def to_py_timedelta(value: int | float, time_unit: TimeUnit) -> timedelta:
     """Convert an integer or float to a Python timedelta object."""
     if time_unit == "us":
         return timedelta(microseconds=value)
-    elif time_unit == "ns":
+    if time_unit == "ns":
         return timedelta(microseconds=value // 1_000)
-    elif time_unit == "ms":
+    if time_unit == "ms":
         return timedelta(milliseconds=value)
-    else:
-        _raise_invalid_time_unit(time_unit)
+    _raise_invalid_time_unit(time_unit)
 
 
 def to_py_decimal(sign: int, digits: Sequence[int], prec: int, scale: int) -> Decimal:

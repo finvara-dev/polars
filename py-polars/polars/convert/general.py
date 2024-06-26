@@ -437,7 +437,7 @@ def from_arrow(
                 schema_overrides=schema_overrides,
             )
         )
-    elif isinstance(data, (pa.Array, pa.ChunkedArray)):
+    if isinstance(data, (pa.Array, pa.ChunkedArray)):
         name = getattr(data, "_name", "") or ""
         s = wrap_s(arrow_to_pyseries(name, data, rechunk=rechunk))
         s = pl.DataFrame(
@@ -446,7 +446,7 @@ def from_arrow(
             schema_overrides=schema_overrides,
         ).to_series()
         return s if (name or schema or schema_overrides) else s.alias("")
-    elif not data:
+    if not data:
         return pl.DataFrame(
             schema=schema,
             schema_overrides=schema_overrides,
@@ -565,7 +565,7 @@ def from_pandas(
     """
     if isinstance(data, (pd.Series, pd.Index, pd.DatetimeIndex)):
         return wrap_s(pandas_to_pyseries("", data, nan_to_null=nan_to_null))
-    elif isinstance(data, pd.DataFrame):
+    if isinstance(data, pd.DataFrame):
         return wrap_df(
             pandas_to_pydf(
                 data,
@@ -575,9 +575,8 @@ def from_pandas(
                 include_index=include_index,
             )
         )
-    else:
-        msg = f"expected pandas DataFrame or Series, got {type(data).__name__!r}"
-        raise TypeError(msg)
+    msg = f"expected pandas DataFrame or Series, got {type(data).__name__!r}"
+    raise TypeError(msg)
 
 
 @deprecate_renamed_parameter("tbl", "data", version="0.20.17")
@@ -734,15 +733,14 @@ def _from_dataframe_repr(m: re.Match[str]) -> DataFrame:
         if df.is_empty():
             # if no dtypes *and* empty, default to string
             return df.with_columns(F.all().cast(String))
-        else:
-            # otherwise, take a trip through our CSV inference logic
-            if all(tp == String for tp in df.schema.values()):
-                from polars.io import read_csv
+        # otherwise, take a trip through our CSV inference logic
+        if all(tp == String for tp in df.schema.values()):
+            from polars.io import read_csv
 
-                buf = io.BytesIO()
-                df.write_csv(file=buf)
-                df = read_csv(buf, new_columns=df.columns, try_parse_dates=True)
-            return df
+            buf = io.BytesIO()
+            df.write_csv(file=buf)
+            df = read_csv(buf, new_columns=df.columns, try_parse_dates=True)
+        return df
     elif schema and not data:
         return df.cast(schema)  # type: ignore[arg-type]
     else:
@@ -775,16 +773,15 @@ def _from_series_repr(m: re.Match[str]) -> Series:
 
     if not values:
         return pl.Series(name=name, values=values, dtype=dtype)
-    else:
-        srs = pl.Series(name=name, values=values, dtype=String)
-        if dtype is None:
-            return srs
-        elif dtype in (Categorical, String):
-            return srs.str.replace('^"(.*)"$', r"$1").cast(dtype)
+    srs = pl.Series(name=name, values=values, dtype=String)
+    if dtype is None:
+        return srs
+    if dtype in (Categorical, String):
+        return srs.str.replace('^"(.*)"$', r"$1").cast(dtype)
 
-        return _cast_repr_strings_with_schema(
-            srs.to_frame(), schema={srs.name: dtype}
-        ).to_series()
+    return _cast_repr_strings_with_schema(
+        srs.to_frame(), schema={srs.name: dtype}
+    ).to_series()
 
 
 def from_dataframe(df: SupportsInterchange, *, allow_copy: bool = True) -> DataFrame:

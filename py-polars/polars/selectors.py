@@ -340,20 +340,18 @@ class _selector_proxy_(Expr):
     def __repr__(self) -> str:
         if not hasattr(self, "_attrs"):
             return repr(self.as_expr())
-        elif hasattr(self, "_repr_override"):
+        if hasattr(self, "_repr_override"):
             return self._repr_override
-        else:
-            selector_name, params = self._attrs["name"], self._attrs["params"] or {}
-            set_ops = {"and": "&", "or": "|", "sub": "-", "xor": "^"}
-            if selector_name in set_ops:
-                op = set_ops[selector_name]
-                return "({})".format(f" {op} ".join(repr(p) for p in params.values()))
-            else:
-                str_params = ", ".join(
-                    (repr(v)[1:-1] if k.startswith("*") else f"{k}={v!r}")
-                    for k, v in params.items()
-                ).rstrip(",")
-                return f"cs.{selector_name}({str_params})"
+        selector_name, params = self._attrs["name"], self._attrs["params"] or {}
+        set_ops = {"and": "&", "or": "|", "sub": "-", "xor": "^"}
+        if selector_name in set_ops:
+            op = set_ops[selector_name]
+            return "({})".format(f" {op} ".join(repr(p) for p in params.values()))
+        str_params = ", ".join(
+            (repr(v)[1:-1] if k.startswith("*") else f"{k}={v!r}")
+            for k, v in params.items()
+        ).rstrip(",")
+        return f"cs.{selector_name}({str_params})"
 
     @overload
     def __sub__(self, other: SelectorType) -> SelectorType: ...
@@ -368,8 +366,7 @@ class _selector_proxy_(Expr):
                 parameters={"self": self, "other": other},
                 name="sub",
             )
-        else:
-            return self.as_expr().__sub__(other)
+        return self.as_expr().__sub__(other)
 
     def __rsub__(self, other: Any) -> NoReturn:
         msg = "unsupported operand type(s) for op: ('Expr' - 'Selector')"
@@ -395,8 +392,7 @@ class _selector_proxy_(Expr):
                 parameters={"self": self, "other": other},
                 name="and",
             )
-        else:
-            return self.as_expr().__and__(other)
+        return self.as_expr().__and__(other)
 
     @overload
     def __or__(self, other: SelectorType) -> SelectorType: ...
@@ -413,8 +409,7 @@ class _selector_proxy_(Expr):
                 parameters={"self": self, "other": other},
                 name="or",
             )
-        else:
-            return self.as_expr().__or__(other)
+        return self.as_expr().__or__(other)
 
     @overload
     def __xor__(self, other: SelectorType) -> SelectorType: ...
@@ -431,8 +426,7 @@ class _selector_proxy_(Expr):
                 parameters={"self": self, "other": other},
                 name="xor",
             )
-        else:
-            return self.as_expr().__or__(other)
+        return self.as_expr().__or__(other)
 
     def __rand__(self, other: Any) -> Expr:
         if is_column(other):
@@ -2283,21 +2277,20 @@ def matches(pattern: str) -> SelectorType:
     """
     if pattern == ".*":
         return all()
-    else:
-        if pattern.startswith(".*"):
-            pattern = pattern[2:]
-        elif pattern.endswith(".*"):
-            pattern = pattern[:-2]
+    if pattern.startswith(".*"):
+        pattern = pattern[2:]
+    elif pattern.endswith(".*"):
+        pattern = pattern[:-2]
 
-        pfx = "^.*" if not pattern.startswith("^") else ""
-        sfx = ".*$" if not pattern.endswith("$") else ""
-        raw_params = f"{pfx}{pattern}{sfx}"
+    pfx = "^.*" if not pattern.startswith("^") else ""
+    sfx = ".*$" if not pattern.endswith("$") else ""
+    raw_params = f"{pfx}{pattern}{sfx}"
 
-        return _selector_proxy_(
-            F.col(raw_params),
-            name="matches",
-            parameters={"pattern": pattern},
-        )
+    return _selector_proxy_(
+        F.col(raw_params),
+        name="matches",
+        parameters={"pattern": pattern},
+    )
 
 
 def numeric() -> SelectorType:

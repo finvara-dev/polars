@@ -85,17 +85,16 @@ class _LazyModule(ModuleType):
             return getattr(module, name)
 
         # user has not installed the proxied/lazy module
-        elif name == "__name__":
+        if name == "__name__":
             return self._module_name
-        elif re.match(r"^__\w+__$", name) and name != "__version__":
+        if re.match(r"^__\w+__$", name) and name != "__version__":
             # allow some minimal introspection on private module
             # attrs to avoid unnecessary error-handling elsewhere
             return None
-        else:
-            # all other attribute access raises a helpful exception
-            pfx = self._mod_pfx.get(self._module_name, "")
-            msg = f"{pfx}{name} requires {self._module_name!r} module to be installed"
-            raise ModuleNotFoundError(msg) from None
+        # all other attribute access raises a helpful exception
+        pfx = self._mod_pfx.get(self._module_name, "")
+        msg = f"{pfx}{name} requires {self._module_name!r} module to be installed"
+        raise ModuleNotFoundError(msg) from None
 
 
 def _lazy_import(module_name: str) -> tuple[ModuleType, bool]:

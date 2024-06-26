@@ -430,7 +430,7 @@ def _identify_from_magic_bytes(data: IO[bytes] | bytes) -> str | None:
         magic_bytes = data.read(8)
         if magic_bytes == xls_bytes:
             return "xls"
-        elif magic_bytes[:4] == xlsx_bytes:
+        if magic_bytes[:4] == xlsx_bytes:
             return "xlsx"
     except UnicodeDecodeError:
         pass
@@ -444,20 +444,19 @@ def _identify_workbook(wb: str | Path | IO[bytes] | bytes) -> str | None:
     if not isinstance(wb, (str, Path)):
         # raw binary data (bytesio, etc)
         return _identify_from_magic_bytes(wb)
-    else:
-        p = Path(wb)
-        ext = p.suffix[1:].lower()
+    p = Path(wb)
+    ext = p.suffix[1:].lower()
 
-        # unambiguous file extensions
-        if ext in ("xlsx", "xlsm", "xlsb"):
-            return ext
-        elif ext[:2] == "od":
-            return "ods"
+    # unambiguous file extensions
+    if ext in ("xlsx", "xlsm", "xlsb"):
+        return ext
+    if ext[:2] == "od":
+        return "ods"
 
-        # check magic bytes to resolve ambiguity (eg: xls/xlsx, or no extension)
-        with p.open("rb") as f:
-            magic_bytes = BytesIO(f.read(8))
-            return _identify_from_magic_bytes(magic_bytes)
+    # check magic bytes to resolve ambiguity (eg: xls/xlsx, or no extension)
+    with p.open("rb") as f:
+        magic_bytes = BytesIO(f.read(8))
+        return _identify_from_magic_bytes(magic_bytes)
 
 
 def _read_spreadsheet(
@@ -613,13 +612,13 @@ def _initialise_spreadsheet_parser(
         sheets = parser.workbook.sheets
         return _read_spreadsheet_xlsx2csv, parser, sheets
 
-    elif engine == "openpyxl":
+    if engine == "openpyxl":
         openpyxl = import_optional("openpyxl")
         parser = openpyxl.load_workbook(source, data_only=True, **engine_options)
         sheets = [{"index": i + 1, "name": ws.title} for i, ws in enumerate(parser)]
         return _read_spreadsheet_openpyxl, parser, sheets
 
-    elif engine == "calamine":
+    if engine == "calamine":
         fastexcel = import_optional("fastexcel", min_version="0.7.0")
         reading_bytesio, reading_bytes = (
             isinstance(source, BytesIO),
@@ -724,12 +723,11 @@ def _drop_null_data(df: pl.DataFrame, *, raise_if_empty: bool) -> pl.DataFrame:
     if len(df) == 0 and len(df.columns) == 0:
         if not raise_if_empty:
             return df
-        else:
-            msg = (
-                "empty Excel sheet"
-                "\n\nIf you want to read this as an empty DataFrame, set `raise_if_empty=False`."
-            )
-            raise NoDataError(msg)
+        msg = (
+            "empty Excel sheet"
+            "\n\nIf you want to read this as an empty DataFrame, set `raise_if_empty=False`."
+        )
+        raise NoDataError(msg)
 
     return df.filter(~F.all_horizontal(F.all().is_null()))
 

@@ -9,6 +9,6 @@ def flexhash(elem: Any) -> int:
     """
     if isinstance(elem, list):
         return hash(tuple(flexhash(e) for e in elem))
-    elif isinstance(elem, dict):
+    if isinstance(elem, dict):
         return hash(tuple((k, flexhash(v)) for k, v in elem.items()))
     return hash(elem)

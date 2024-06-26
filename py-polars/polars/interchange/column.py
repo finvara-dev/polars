@@ -47,8 +47,7 @@ class PolarsColumn(Column):
         """Offset of the first element with respect to the start of the underlying buffer."""  # noqa: W505
         if self._col.dtype == Boolean:
             return self._col._get_buffer_info()[1]
-        else:
-            return 0
+        return 0
 
     @property
     def dtype(self) -> Dtype:
@@ -88,8 +87,7 @@ class PolarsColumn(Column):
         """Description of the null representation the column uses."""
         if self.null_count == 0:
             return ColumnNullType.NON_NULLABLE, None
-        else:
-            return ColumnNullType.USE_BITMASK, 0
+        return ColumnNullType.USE_BITMASK, 0
 
     @property
     def null_count(self) -> int:

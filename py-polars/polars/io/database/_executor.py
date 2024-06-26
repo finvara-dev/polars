@@ -361,20 +361,18 @@ class ConnectionExecutor:
         if self.driver_name == "sqlalchemy":
             if self._is_alchemy_session(conn):
                 return conn
-            else:
-                # where possible, use the raw connection to access arrow integration
-                if conn.engine.driver == "databricks-sql-python":
-                    self.driver_name = "databricks"
-                    return conn.engine.raw_connection().cursor()
-                elif conn.engine.driver == "duckdb_engine":
-                    self.driver_name = "duckdb"
-                    return conn.engine.raw_connection().driver_connection.c
-                elif self._is_alchemy_engine(conn):
-                    # note: if we create it, we can close it
-                    self.can_close_cursor = True
-                    return conn.connect()
-                else:
-                    return conn
+            # where possible, use the raw connection to access arrow integration
+            if conn.engine.driver == "databricks-sql-python":
+                self.driver_name = "databricks"
+                return conn.engine.raw_connection().cursor()
+            if conn.engine.driver == "duckdb_engine":
+                self.driver_name = "duckdb"
+                return conn.engine.raw_connection().driver_connection.c
+            if self._is_alchemy_engine(conn):
+                # note: if we create it, we can close it
+                self.can_close_cursor = True
+                return conn.connect()
+            return conn
 
         elif hasattr(conn, "cursor"):
             # connection has a dedicated cursor; prefer over direct execute

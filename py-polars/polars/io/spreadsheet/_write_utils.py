@@ -80,11 +80,10 @@ def _adjacent_cols(df: DataFrame, cols: Iterable[str], min_max: dict[str, Any]) 
     idxs = sorted(df.get_column_index(col) for col in cols)
     if idxs != sorted(range(min(idxs), max(idxs) + 1)):
         return False
-    else:
-        columns = df.columns
-        min_max["min"] = {"idx": idxs[0], "name": columns[idxs[0]]}
-        min_max["max"] = {"idx": idxs[-1], "name": columns[idxs[-1]]}
-        return True
+    columns = df.columns
+    min_max["min"] = {"idx": idxs[0], "name": columns[idxs[0]]}
+    min_max["max"] = {"idx": idxs[-1], "name": columns[idxs[-1]]}
+    return True
 
 
 def _unpack_multi_column_dict(
@@ -193,8 +192,7 @@ def _xl_column_range(
     )
     if as_range:
         return "".join(_xl_rowcols_to_range(*col_start, *col_finish))
-    else:
-        return col_start + col_finish
+    return col_start + col_finish
 
 
 def _xl_column_multi_range(
@@ -555,9 +553,8 @@ def _xl_table_formula(df: DataFrame, cols: Iterable[str], func: str) -> str:
         cols = [cols]
     if _adjacent_cols(df, cols, min_max=m):
         return f"={func.upper()}([@[{m['min']['name']}]:[{m['max']['name']}]])"
-    else:
-        colrefs = ",".join(f"[@[{c}]]" for c in cols)
-        return f"={func.upper()}({colrefs})"
+    colrefs = ",".join(f"[@[{c}]]" for c in cols)
+    return f"={func.upper()}({colrefs})"
 
 
 def _xl_unique_table_name(wb: Workbook) -> str:

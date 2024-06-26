@@ -202,11 +202,10 @@ class ExprBinaryNameSpace:
         """
         if encoding == "hex":
             return wrap_expr(self._pyexpr.bin_hex_decode(strict))
-        elif encoding == "base64":
+        if encoding == "base64":
             return wrap_expr(self._pyexpr.bin_base64_decode(strict))
-        else:
-            msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
-            raise ValueError(msg)
+        msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
+        raise ValueError(msg)
 
     def encode(self, encoding: TransferEncoding) -> Expr:
         r"""
@@ -246,8 +245,7 @@ class ExprBinaryNameSpace:
         """
         if encoding == "hex":
             return wrap_expr(self._pyexpr.bin_hex_encode())
-        elif encoding == "base64":
+        if encoding == "base64":
             return wrap_expr(self._pyexpr.bin_base64_encode())
-        else:
-            msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
-            raise ValueError(msg)
+        msg = f"`encoding` must be one of {{'hex', 'base64'}}, got {encoding!r}"
+        raise ValueError(msg)

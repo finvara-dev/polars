@@ -192,8 +192,7 @@ def _unpack_schema(
         """Parse non-Polars data types as Polars data types."""
         if is_polars_dtype(dtype, include_unknown=True):
             return dtype
-        else:
-            return parse_into_dtype(dtype)
+        return parse_into_dtype(dtype)
 
     def _parse_schema_overrides(
         schema_overrides: SchemaDict | None = None,
@@ -272,9 +271,9 @@ def _handle_columns_arg(
     """Rename data according to columns argument."""
     if columns is None:
         return data
-    elif not data:
+    if not data:
         return [pl.Series(name=c)._s for c in columns]
-    elif len(data) != len(columns):
+    if len(data) != len(columns):
         msg = f"dimensions of columns arg ({len(columns)}) must match data dimensions ({len(data)})"
         raise ValueError(msg)
 
@@ -590,7 +589,7 @@ def _sequence_of_sequence_to_pydf(
             )
         return pydf
 
-    elif orient == "col":
+    if orient == "col":
         column_names, schema_overrides = _unpack_schema(
             schema, schema_overrides=schema_overrides, n_expected=len(data)
         )
@@ -604,10 +603,8 @@ def _sequence_of_sequence_to_pydf(
             for i, element in enumerate(data)
         ]
         return PyDataFrame(data_series)
-
-    else:
-        msg = f"`orient` must be one of {{'col', 'row', None}}, got {orient!r}"
-        raise ValueError(msg)
+    msg = f"`orient` must be one of {{'col', 'row', None}}, got {orient!r}"
+    raise ValueError(msg)
 
 
 def _sequence_of_series_to_pydf(
@@ -741,8 +738,7 @@ def _sequence_of_numpy_to_pydf(
 ) -> PyDataFrame:
     if first_element.ndim == 1:
         return _sequence_of_sequence_to_pydf(first_element, **kwargs)
-    else:
-        return _sequence_of_elements_to_pydf(first_element, **kwargs)
+    return _sequence_of_elements_to_pydf(first_element, **kwargs)
 
 
 def _sequence_of_pandas_to_pydf(
@@ -1094,16 +1090,15 @@ def _pandas_has_default_index(df: pd.DataFrame) -> bool:
     if len(index_cols) > 1 or index_cols not in ([None], [""]):
         # not default: more than one index, or index is named
         return False
-    elif df.index.equals(RangeIndex(start=0, stop=len(df), step=1)):
+    if df.index.equals(RangeIndex(start=0, stop=len(df), step=1)):
         # is default: simple range index
         return True
-    else:
-        # finally, is the index _equivalent_ to a default unnamed
-        # integer index with frame data that was previously sorted
-        return (
-            str(df.index.dtype).startswith("int")
-            and (df.index.sort_values() == np.arange(len(df))).all()
-        )
+    # finally, is the index _equivalent_ to a default unnamed
+    # integer index with frame data that was previously sorted
+    return (
+        str(df.index.dtype).startswith("int")
+        and (df.index.sort_values() == np.arange(len(df))).all()
+    )
 
 
 def arrow_to_pydf(

@@ -195,12 +195,12 @@ def durations(time_unit: TimeUnit = "us") -> SearchStrategy[timedelta]:
             min_value=timedelta(microseconds=I64_MIN),
             max_value=timedelta(microseconds=I64_MAX),
         )
-    elif time_unit == "ns":
+    if time_unit == "ns":
         return st.timedeltas(
             min_value=timedelta(microseconds=I64_MIN // 1000),
             max_value=timedelta(microseconds=I64_MAX // 1000),
         )
-    elif time_unit == "ms":
+    if time_unit == "ms":
         # TODO: Enable full range of millisecond durations
         # timedelta.min/max fall within the range
         # return st.timedeltas()
@@ -208,9 +208,8 @@ def durations(time_unit: TimeUnit = "us") -> SearchStrategy[timedelta]:
             min_value=timedelta(microseconds=I64_MIN),
             max_value=timedelta(microseconds=I64_MAX),
         )
-    else:
-        msg = f"invalid time unit: {time_unit!r}"
-        raise InvalidArgument(msg)
+    msg = f"invalid time unit: {time_unit!r}"
+    raise InvalidArgument(msg)
 
 
 def decimals(
@@ -329,8 +328,7 @@ def structs(
 
     if allow_null:
         return st.fixed_dictionaries({}, optional=strats)
-    else:
-        return st.fixed_dictionaries(strats)
+    return st.fixed_dictionaries(strats)
 
 
 def nulls() -> SearchStrategy[None]:

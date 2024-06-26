@@ -194,12 +194,11 @@ def _format_argument_list(allowed_args: list[str]) -> str:
         allowed_args.remove("self")
     if not allowed_args:
         return ""
-    elif len(allowed_args) == 1:
+    if len(allowed_args) == 1:
         return f" except for {allowed_args[0]!r}"
-    else:
-        last = allowed_args[-1]
-        args = ", ".join([f"{x!r}" for x in allowed_args[:-1]])
-        return f" except for {args} and {last!r}"
+    last = allowed_args[-1]
+    args = ", ".join([f"{x!r}" for x in allowed_args[:-1]])
+    return f" except for {args} and {last!r}"
 
 
 def deprecate_parameter_as_multi_positional(

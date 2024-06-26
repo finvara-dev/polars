@@ -40,16 +40,15 @@ def pandas_series_to_arrow(
         elif first_non_none is None:
             return pa.nulls(length or len(values), pa.large_utf8())
         return pa.array(values, from_pandas=nan_to_null)
-    elif dtype:
+    if dtype:
         return pa.array(values, from_pandas=nan_to_null)
-    else:
-        # Pandas Series is actually a Pandas DataFrame when the original DataFrame
-        # contains duplicated columns and a duplicated column is requested with df["a"].
-        msg = "duplicate column names found: "
-        raise ValueError(
-            msg,
-            f"{values.columns.tolist()!s}",  # type: ignore[union-attr]
-        )
+    # Pandas Series is actually a Pandas DataFrame when the original DataFrame
+    # contains duplicated columns and a duplicated column is requested with df["a"].
+    msg = "duplicate column names found: "
+    raise ValueError(
+        msg,
+        f"{values.columns.tolist()!s}",  # type: ignore[union-attr]
+    )
 
 
 def coerce_arrow(array: pa.Array) -> pa.Array:

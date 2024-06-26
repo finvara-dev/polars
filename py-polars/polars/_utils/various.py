@@ -66,8 +66,7 @@ def _process_null_values(
 ) -> None | str | Sequence[str] | list[tuple[str, str]]:
     if isinstance(null_values, dict):
         return list(null_values.items())
-    else:
-        return null_values
+    return null_values
 
 
 def _is_generator(val: object | Iterator[T]) -> TypeIs[Iterator[T]]:
@@ -89,7 +88,7 @@ def is_bool_sequence(
     """Check whether the given sequence is a sequence of booleans."""
     if _check_for_numpy(val) and isinstance(val, np.ndarray):
         return val.dtype == np.bool_
-    elif include_series and isinstance(val, pl.Series):
+    if include_series and isinstance(val, pl.Series):
         return val.dtype == pl.Boolean
     return isinstance(val, Sequence) and _is_iterable_of(val, bool)
 
@@ -100,7 +99,7 @@ def is_int_sequence(
     """Check whether the given sequence is a sequence of integers."""
     if _check_for_numpy(val) and isinstance(val, np.ndarray):
         return np.issubdtype(val.dtype, np.integer)
-    elif include_series and isinstance(val, pl.Series):
+    if include_series and isinstance(val, pl.Series):
         return val.dtype.is_integer()
     return isinstance(val, Sequence) and _is_iterable_of(val, int)
 
@@ -127,9 +126,9 @@ def is_str_sequence(
     """
     if allow_str is False and isinstance(val, str):
         return False
-    elif _check_for_numpy(val) and isinstance(val, np.ndarray):
+    if _check_for_numpy(val) and isinstance(val, np.ndarray):
         return np.issubdtype(val.dtype, np.str_)
-    elif include_series and isinstance(val, pl.Series):
+    if include_series and isinstance(val, pl.Series):
         return val.dtype == pl.String
     return isinstance(val, Sequence) and _is_iterable_of(val, str)
 
@@ -225,17 +224,16 @@ def scale_bytes(sz: int, unit: SizeUnit) -> int | float:
     """Scale size in bytes to other size units (eg: "kb", "mb", "gb", "tb")."""
     if unit in {"b", "bytes"}:
         return sz
-    elif unit in {"kb", "kilobytes"}:
+    if unit in {"kb", "kilobytes"}:
         return sz / 1024
-    elif unit in {"mb", "megabytes"}:
+    if unit in {"mb", "megabytes"}:
         return sz / 1024**2
-    elif unit in {"gb", "gigabytes"}:
+    if unit in {"gb", "gigabytes"}:
         return sz / 1024**3
-    elif unit in {"tb", "terabytes"}:
+    if unit in {"tb", "terabytes"}:
         return sz / 1024**4
-    else:
-        msg = f"`unit` must be one of {{'b', 'kb', 'mb', 'gb', 'tb'}}, got {unit!r}"
-        raise ValueError(msg)
+    msg = f"`unit` must be one of {{'b', 'kb', 'mb', 'gb', 'tb'}}, got {unit!r}"
+    raise ValueError(msg)
 
 
 def _cast_repr_strings_with_schema(

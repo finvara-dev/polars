@@ -96,8 +96,7 @@ def test_map_groups_none() -> None:
     def func(s: Sequence[pl.Series]) -> pl.Series | None:
         if s[0][0] == 190:
             return None
-        else:
-            return s[0]
+        return s[0]
 
     out = (
         df.group_by("g", maintain_order=True).agg(

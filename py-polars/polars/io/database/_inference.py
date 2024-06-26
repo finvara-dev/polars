@@ -292,7 +292,7 @@ def _timeunit_from_precision(precision: int | str | None) -> str | None:
 
     if not precision:
         return None
-    elif isinstance(precision, str):
+    if isinstance(precision, str):
         if precision.isdigit():
             precision = int(precision)
         elif (precision := precision.lower()) in ("s", "ms", "us", "ns"):

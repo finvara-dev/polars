@@ -93,8 +93,7 @@ class DataType(metaclass=DataTypeClass):
     def __eq__(self, other: PolarsDataType) -> bool:  # type: ignore[override]
         if type(other) is DataTypeClass:
             return issubclass(other, type(self))
-        else:
-            return isinstance(other, type(self))
+        return isinstance(other, type(self))
 
     def __hash__(self) -> int:
         return hash(self.__class__)
@@ -296,10 +295,9 @@ class Decimal(NumericType):
         # allow comparing object instances to class
         if type(other) is DataTypeClass and issubclass(other, Decimal):
             return True
-        elif isinstance(other, Decimal):
+        if isinstance(other, Decimal):
             return self.precision == other.precision and self.scale == other.scale
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, self.precision, self.scale))
@@ -389,12 +387,11 @@ class Datetime(TemporalType):
         # allow comparing object instances to class
         if type(other) is DataTypeClass and issubclass(other, Datetime):
             return True
-        elif isinstance(other, Datetime):
+        if isinstance(other, Datetime):
             return (
                 self.time_unit == other.time_unit and self.time_zone == other.time_zone
             )
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, self.time_unit, self.time_zone))
@@ -438,10 +435,9 @@ class Duration(TemporalType):
         # allow comparing object instances to class
         if type(other) is DataTypeClass and issubclass(other, Duration):
             return True
-        elif isinstance(other, Duration):
+        if isinstance(other, Duration):
             return self.time_unit == other.time_unit
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, self.time_unit))
@@ -477,10 +473,9 @@ class Categorical(DataType):
         # allow comparing object instances to class
         if type(other) is DataTypeClass and issubclass(other, Categorical):
             return True
-        elif isinstance(other, Categorical):
+        if isinstance(other, Categorical):
             return self.ordering == other.ordering
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, self.ordering))
@@ -539,10 +534,9 @@ class Enum(DataType):
         # allow comparing object instances to class
         if type(other) is DataTypeClass and issubclass(other, Enum):
             return True
-        elif isinstance(other, Enum):
+        if isinstance(other, Enum):
             return self.categories.equals(other.categories)
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, tuple(self.categories)))
@@ -616,10 +610,9 @@ class List(NestedType):
         # allow comparing object instances to class
         if type(other) is DataTypeClass and issubclass(other, List):
             return True
-        elif isinstance(other, List):
+        if isinstance(other, List):
             return self.inner == other.inner
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, self.inner))
@@ -705,11 +698,10 @@ class Array(NestedType):
         # allow comparing object instances to class
         if type(other) is DataTypeClass and issubclass(other, Array):
             return True
-        elif isinstance(other, Array):
+        if isinstance(other, Array):
             if self.shape != other.shape:
                 return False
-            else:
-                return self.inner == other.inner
+            return self.inner == other.inner
         else:
             return False
 
@@ -820,10 +812,9 @@ class Struct(NestedType):
         # as being equal. (See the List type for more info).
         if isclass(other) and issubclass(other, Struct):
             return True
-        elif isinstance(other, Struct):
+        if isinstance(other, Struct):
             return self.fields == other.fields
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, tuple(self.fields)))

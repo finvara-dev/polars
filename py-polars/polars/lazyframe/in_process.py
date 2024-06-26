@@ -35,8 +35,7 @@ class InProcessQuery:
         out = self._inner.fetch()
         if out is not None:
             return wrap_df(out)
-        else:
-            return None
+        return None
 
     def fetch_blocking(self) -> DataFrame:
         """Await the result synchronously."""

@@ -550,14 +550,13 @@ def _read_csv_impl(
         )
         if columns is None:
             return scan.collect()
-        elif is_str_sequence(columns, allow_str=False):
+        if is_str_sequence(columns, allow_str=False):
             return scan.select(columns).collect()
-        else:
-            msg = (
-                "cannot use glob patterns and integer based projection as `columns` argument"
-                "\n\nUse columns: List[str]"
-            )
-            raise ValueError(msg)
+        msg = (
+            "cannot use glob patterns and integer based projection as `columns` argument"
+            "\n\nUse columns: List[str]"
+        )
+        raise ValueError(msg)
 
     projection, columns = parse_columns_arg(columns)
 
@@ -1133,8 +1132,7 @@ def scan_csv(
         def with_column_names(cols: list[str]) -> list[str]:
             if len(cols) > len(new_columns):
                 return new_columns + cols[len(new_columns) :]  # type: ignore[operator]
-            else:
-                return new_columns  # type: ignore[return-value]
+            return new_columns  # type: ignore[return-value]
 
     _check_arg_is_1byte("separator", separator, can_be_empty=False)
     _check_arg_is_1byte("quote_char", quote_char, can_be_empty=True)

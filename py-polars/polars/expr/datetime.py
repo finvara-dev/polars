@@ -1447,13 +1447,12 @@ class ExprDateTimeNameSpace:
         """
         if time_unit in DTYPE_TEMPORAL_UNITS:
             return self.timestamp(time_unit)  # type: ignore[arg-type]
-        elif time_unit == "s":
+        if time_unit == "s":
             return wrap_expr(self._pyexpr.dt_epoch_seconds())
-        elif time_unit == "d":
+        if time_unit == "d":
             return wrap_expr(self._pyexpr).cast(Date).cast(Int32)
-        else:
-            msg = f"`time_unit` must be one of {{'ns', 'us', 'ms', 's', 'd'}}, got {time_unit!r}"
-            raise ValueError(msg)
+        msg = f"`time_unit` must be one of {{'ns', 'us', 'ms', 's', 'd'}}, got {time_unit!r}"
+        raise ValueError(msg)
 
     def timestamp(self, time_unit: TimeUnit = "us") -> Expr:
         """

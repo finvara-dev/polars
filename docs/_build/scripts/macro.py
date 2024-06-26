@@ -79,14 +79,12 @@ def create_api_function_link(language: str, function_key: str) -> Optional[str]:
     if info is None:
         logging.warning(f"Could not find {function_key} for language {language}")
         return None
-    else:
-        # Either be a direct link
-        if type(info) == str:
-            return f"[:material-api:  `{function_key}`]({info})"
-        else:
-            function_name = info["name"]
-            link = info["link"]
-            return f"[:material-api:  `{function_name}`]({link})"
+    # Either be a direct link
+    if type(info) == str:
+        return f"[:material-api:  `{function_key}`]({info})"
+    function_name = info["name"]
+    link = info["link"]
+    return f"[:material-api:  `{function_name}`]({link})"
 
 
 def code_tab(
