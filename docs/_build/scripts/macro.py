@@ -80,7 +80,7 @@ def create_api_function_link(language: str, function_key: str) -> Optional[str]:
         logging.warning(f"Could not find {function_key} for language {language}")
         return None
     # Either be a direct link
-    if type(info) == str:
+    if type(info) is str:
         return f"[:material-api:  `{function_key}`]({info})"
     function_name = info["name"]
     link = info["link"]

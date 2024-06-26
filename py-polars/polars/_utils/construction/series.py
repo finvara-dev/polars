@@ -226,7 +226,7 @@ def sequence_to_pyseries(
             strict,
         )
 
-    elif python_dtype in (list, tuple):
+    if python_dtype in (list, tuple):
         if dtype is None:
             return PySeries.new_from_any_values(name, values, strict=strict)
         if dtype == Object:
@@ -253,31 +253,30 @@ def sequence_to_pyseries(
             pyseries = pyseries.cast(dtype, strict=False, wrap_numerical=False)
         return pyseries
 
-    elif python_dtype == pl.Series:
+    if python_dtype == pl.Series:
         return PySeries.new_series_list(
             name, [v._s if v is not None else None for v in values], strict
         )
 
-    elif python_dtype == PySeries:
+    if python_dtype == PySeries:
         return PySeries.new_series_list(name, values, strict)
-    else:
-        constructor = py_type_to_constructor(python_dtype)
-        if constructor == PySeries.new_object:
-            try:
-                srs = PySeries.new_from_any_values(name, values, strict)
-                if _check_for_numpy(python_dtype, check_type=False) and isinstance(
-                    np.bool_(True), np.generic
-                ):
-                    dtype = numpy_char_code_to_dtype(np.dtype(python_dtype).char)
-                    return srs.cast(dtype, strict=strict, wrap_numerical=False)
-                return srs
+    constructor = py_type_to_constructor(python_dtype)
+    if constructor == PySeries.new_object:
+        try:
+            srs = PySeries.new_from_any_values(name, values, strict)
+            if _check_for_numpy(python_dtype, check_type=False) and isinstance(
+                np.bool_(True), np.generic
+            ):
+                dtype = numpy_char_code_to_dtype(np.dtype(python_dtype).char)
+                return srs.cast(dtype, strict=strict, wrap_numerical=False)
+            return srs
 
-            except RuntimeError:
-                return PySeries.new_from_any_values(name, values, strict=strict)
+        except RuntimeError:
+            return PySeries.new_from_any_values(name, values, strict=strict)
 
-        return _construct_series_with_fallbacks(
-            constructor, name, values, dtype, strict=strict
-        )
+    return _construct_series_with_fallbacks(
+        constructor, name, values, dtype, strict=strict
+    )
 
 
 def _construct_series_with_fallbacks(

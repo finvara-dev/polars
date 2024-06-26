@@ -1870,10 +1870,9 @@ class DataFrame:
                     }
                 # return a {"col": array} dict
                 return {srs.name: srs.to_jax() for srs in frame}
-            else:
-                valid_jax_types = ", ".join(get_args(JaxExportType))
-                msg = f"invalid `return_type`: {return_type!r}\nExpected one of: {valid_jax_types}"
-                raise ValueError(msg)
+            valid_jax_types = ", ".join(get_args(JaxExportType))
+            msg = f"invalid `return_type`: {return_type!r}\nExpected one of: {valid_jax_types}"
+            raise ValueError(msg)
 
     @overload
     def to_torch(
@@ -2086,15 +2085,14 @@ class DataFrame:
             # return a {"col": tensor} dict
             return {srs.name: srs.to_torch() for srs in frame}
 
-        elif return_type == "dataset":
+        if return_type == "dataset":
             # return a torch Dataset object
             from polars.ml.torch import PolarsDataset
 
             return PolarsDataset(frame, label=label, features=features)
-        else:
-            valid_torch_types = ", ".join(get_args(TorchExportType))
-            msg = f"invalid `return_type`: {return_type!r}\nExpected one of: {valid_torch_types}"
-            raise ValueError(msg)
+        valid_torch_types = ", ".join(get_args(TorchExportType))
+        msg = f"invalid `return_type`: {return_type!r}\nExpected one of: {valid_torch_types}"
+        raise ValueError(msg)
 
     def to_pandas(
         self,
@@ -3769,9 +3767,8 @@ class DataFrame:
         if isinstance(engine, str):
             msg = f"engine {engine!r} is not supported"
             raise ValueError(msg)
-        else:
-            msg = f"unrecognised connection type {connection!r}"
-            raise TypeError(msg)
+        msg = f"unrecognised connection type {connection!r}"
+        raise TypeError(msg)
 
     @overload
     def write_delta(
@@ -9741,7 +9738,7 @@ class DataFrame:
                 return dict(zip(self.columns, row))
             return row
 
-        elif by_predicate is not None:
+        if by_predicate is not None:
             if not isinstance(by_predicate, pl.Expr):
                 msg = f"expected `by_predicate` to be an expression, got {type(by_predicate).__name__!r}"
                 raise TypeError(msg)
@@ -9758,9 +9755,8 @@ class DataFrame:
             if named:
                 return dict(zip(self.columns, row))
             return row
-        else:
-            msg = "one of `index` or `by_predicate` must be set"
-            raise ValueError(msg)
+        msg = "one of `index` or `by_predicate` must be set"
+        raise ValueError(msg)
 
     @overload
     def rows(self, *, named: Literal[False] = ...) -> list[tuple[Any, ...]]: ...

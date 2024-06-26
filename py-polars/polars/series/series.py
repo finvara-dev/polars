@@ -963,9 +963,8 @@ class Series:
             if "rhs" in op_ffi:
                 return self._from_pyseries(getattr(_s, op_s)(self._s))
             return self._from_pyseries(getattr(self._s, op_s)(_s))
-        else:
-            other = maybe_cast(other, self.dtype)
-            f = get_ffi_func(op_ffi, self.dtype, self._s)
+        other = maybe_cast(other, self.dtype)
+        f = get_ffi_func(op_ffi, self.dtype, self._s)
         if f is None:
             msg = (
                 f"cannot do arithmetic with Series of dtype: {self.dtype!r} and argument"

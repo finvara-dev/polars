@@ -57,12 +57,11 @@ def _create_col(
             f" got iterable of type {type(item).__name__!r}."
         )
         raise TypeError(msg)
-    else:
-        msg = (
-            "invalid input for `col`"
-            f"\n\nExpected `str` or `DataType`, got {type(name).__name__!r}."
-        )
-        raise TypeError(msg)
+    msg = (
+        "invalid input for `col`"
+        f"\n\nExpected `str` or `DataType`, got {type(name).__name__!r}."
+    )
+    raise TypeError(msg)
 
 
 class Col:

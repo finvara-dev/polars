@@ -374,13 +374,13 @@ class ConnectionExecutor:
                 return conn.connect()
             return conn
 
-        elif hasattr(conn, "cursor"):
+        if hasattr(conn, "cursor"):
             # connection has a dedicated cursor; prefer over direct execute
             cursor = cursor() if callable(cursor := conn.cursor) else cursor
             self.can_close_cursor = True
             return cursor
 
-        elif hasattr(conn, "execute"):
+        if hasattr(conn, "execute"):
             # can execute directly (given cursor, sqlalchemy connection, etc)
             return conn
 

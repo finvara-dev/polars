@@ -702,8 +702,7 @@ class Array(NestedType):
             if self.shape != other.shape:
                 return False
             return self.inner == other.inner
-        else:
-            return False
+        return False
 
     def __hash__(self) -> int:
         return hash((self.__class__, self.inner, self.size))

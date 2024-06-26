@@ -206,7 +206,7 @@ def _select_columns(
         msg = f"cannot select columns using Sequence with elements of type {type(first).__name__!r}"
         raise TypeError(msg)
 
-    elif isinstance(key, pl.Series):
+    if isinstance(key, pl.Series):
         if key.is_empty():
             return df.__class__()
         dtype = key.dtype
@@ -219,7 +219,7 @@ def _select_columns(
         msg = f"cannot select columns using Series of type {dtype}"
         raise TypeError(msg)
 
-    elif _check_for_numpy(key) and isinstance(key, np.ndarray):
+    if _check_for_numpy(key) and isinstance(key, np.ndarray):
         if key.ndim != 1:
             msg = "multi-dimensional NumPy arrays not supported as index"
             raise TypeError(msg)

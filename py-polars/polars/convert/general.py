@@ -741,10 +741,9 @@ def _from_dataframe_repr(m: re.Match[str]) -> DataFrame:
             df.write_csv(file=buf)
             df = read_csv(buf, new_columns=df.columns, try_parse_dates=True)
         return df
-    elif schema and not data:
+    if schema and not data:
         return df.cast(schema)  # type: ignore[arg-type]
-    else:
-        return _cast_repr_strings_with_schema(df, schema)
+    return _cast_repr_strings_with_schema(df, schema)
 
 
 def _from_series_repr(m: re.Match[str]) -> Series:

@@ -669,7 +669,7 @@ class InstructionTranslator:
             expr = f"{e1} {op} {e2}"
             return f"({expr})" if depth else expr
 
-        elif value == param_name:
+        if value == param_name:
             return f'pl.col("{col}")'
 
         return value
