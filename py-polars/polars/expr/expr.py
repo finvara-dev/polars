@@ -10649,7 +10649,7 @@ def _prepare_alpha(
         msg = "one of `com`, `span`, `half_life`, or `alpha` must be set"
         raise ValueError(msg)
 
-    elif not (0 < alpha <= 1):
+    elif not 0 < alpha <= 1:
         msg = f"require 0 < `alpha` <= 1 (found {alpha!r})"
         raise ValueError(msg)
 
