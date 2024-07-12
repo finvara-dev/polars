@@ -176,7 +176,7 @@ def _infer_dtype_from_database_typename(
         dtype = Null
 
     # temporal dtypes
-    elif value.startswith(("DATETIME", "TIMESTAMP")) and not (value.endswith("[D]")):
+    elif value.startswith(("DATETIME", "TIMESTAMP")) and not value.endswith("[D]"):
         if any((tz in value.replace(" ", "")) for tz in ("TZ", "TIMEZONE")):
             if "WITHOUT" not in value:
                 return None  # there's a timezone, but we don't know what it is

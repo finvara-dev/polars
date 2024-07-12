@@ -560,7 +560,7 @@ def _handle_null_probability_deprecation(
     )
 
     def prob_to_bool(prob: float) -> bool:
-        if not (0.0 <= prob <= 1.0):
+        if not 0.0 <= prob <= 1.0:
             msg = f"`null_probability` should be between 0.0 and 1.0, got {prob!r}"
             raise InvalidArgument(msg)
 
