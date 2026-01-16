@@ -75,3 +75,5 @@ flask-cors
 # Stub files
 pandas-stubs
 boto3-stubs
+filelock>=3.20.3 # not directly required, pinned by Snyk to avoid a vulnerability
+werkzeug>=3.1.5 # not directly required, pinned by Snyk to avoid a vulnerability
